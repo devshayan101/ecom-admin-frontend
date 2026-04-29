@@ -7,6 +7,7 @@ import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { apiGet } from "@/lib/api-client";
 import type { DashboardSummary } from "@/lib/types";
 import dayjs from "dayjs";
+import TopProducts from "@/components/dashboard/TopProducts";
 
 export default function DashboardPage() {
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
@@ -100,6 +101,8 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      <TopProducts />
     </div>
   );
 }
