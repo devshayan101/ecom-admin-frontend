@@ -35,7 +35,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+      <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
@@ -43,7 +43,7 @@ export default function DashboardPage() {
             <CardTitle>Today Revenue</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-gray-900">
+            <p className="text-2xl font-bold text-foreground">
               ${summary?.today_revenue?.toFixed(2) || "0.00"}
             </p>
           </CardContent>
@@ -54,7 +54,7 @@ export default function DashboardPage() {
             <CardTitle>Weekly Revenue</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-gray-900">
+            <p className="text-2xl font-bold text-foreground">
               ${summary?.weekly_revenue?.toFixed(2) || "0.00"}
             </p>
           </CardContent>
@@ -65,7 +65,7 @@ export default function DashboardPage() {
             <CardTitle>Monthly Revenue</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-gray-900">
+            <p className="text-2xl font-bold text-foreground">
               ${summary?.monthly_revenue?.toFixed(2) || "0.00"}
             </p>
           </CardContent>
@@ -76,7 +76,7 @@ export default function DashboardPage() {
             <CardTitle>Today Orders</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-gray-900">
+            <p className="text-2xl font-bold text-foreground">
               {summary?.today_order_count || 0}
             </p>
           </CardContent>

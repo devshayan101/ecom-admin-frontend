@@ -18,10 +18,11 @@ export default function Button({
     "inline-flex items-center justify-center font-medium rounded-md transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:pointer-events-none";
 
   const variants = {
-    primary: "bg-blue-600 text-white hover:bg-blue-500",
-    secondary: "bg-gray-100 text-gray-900 hover:bg-gray-200",
-    destructive: "bg-red-600 text-white hover:bg-red-500",
-    ghost: "bg-transparent hover:bg-gray-100 text-foreground",
+    primary: "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm",
+    secondary: "bg-secondary text-secondary-foreground border border-border hover:bg-secondary/80 shadow-xs",
+    destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-sm",
+    ghost: "bg-transparent hover:bg-accent hover:text-accent-foreground text-foreground",
+    cta: "bg-color-cta text-white hover:opacity-90 shadow-sm", // Added CTA variant
   };
 
   const sizes = {

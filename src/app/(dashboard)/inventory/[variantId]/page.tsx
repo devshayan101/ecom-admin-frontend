@@ -70,15 +70,15 @@ export default function InventoryDetailPage() {
   const isLow = item ? available <= item.low_stock_threshold : false;
 
   if (loading) return <div className="py-12 text-center"><LoadingSpinner /></div>;
-  if (!item) return <div className="py-12 text-center text-gray-500">Inventory item not found</div>;
+  if (!item) return <div className="py-12 text-center text-muted-foreground">Inventory item not found</div>;
 
   return (
     <div className="space-y-6 max-w-4xl">
       <div className="flex items-center gap-4">
-        <button onClick={() => router.back()} className="text-gray-500 hover:text-foreground">
+        <button onClick={() => router.back()} className="text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <h1 className="text-2xl font-bold text-gray-900">Inventory Detail</h1>
+        <h1 className="text-2xl font-bold text-foreground">Inventory Detail</h1>
       </div>
 
       {error && (

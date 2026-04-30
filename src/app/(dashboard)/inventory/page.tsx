@@ -27,8 +27,8 @@ export default function InventoryPage() {
       title: "Product",
       render: (item: InventoryItem) => (
         <div>
-          <p className="font-medium text-gray-900">{item.product_name || "Product"}</p>
-          <p className="text-xs text-gray-500">{item.product_id}</p>
+          <p className="font-medium text-foreground">{item.product_name || "Product"}</p>
+          <p className="text-xs text-muted-foreground">{item.product_id}</p>
         </div>
       ),
     },
@@ -43,7 +43,7 @@ export default function InventoryPage() {
       key: "stock",
       title: "Stock",
       render: (item: InventoryItem) => (
-        <span className="text-sm font-medium text-gray-900">{item.stock}</span>
+        <span className="text-sm font-medium text-foreground">{item.stock}</span>
       ),
     },
     {
@@ -58,7 +58,7 @@ export default function InventoryPage() {
       title: "Available",
       render: (item: InventoryItem) => {
         const available = item.available ?? (item.stock - item.reserved);
-        return <span className="text-sm font-medium text-gray-900">{available}</span>;
+        return <span className="text-sm font-medium text-foreground">{available}</span>;
       },
     },
     {
@@ -80,7 +80,7 @@ export default function InventoryPage() {
       render: (item: InventoryItem) => (
         <button
           onClick={() => router.push(`/inventory/${item._id}`)}
-          className="text-sm text-blue-600 hover:text-blue-500"
+          className="text-sm text-primary hover:text-blue-500"
         >
           Adjust
         </button>
@@ -90,7 +90,7 @@ export default function InventoryPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Inventory</h1>
+      <h1 className="text-2xl font-bold text-foreground">Inventory</h1>
 
       <div className="flex gap-4 items-end">
         <div className="flex-1">

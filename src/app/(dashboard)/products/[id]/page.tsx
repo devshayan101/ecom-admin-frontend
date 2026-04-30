@@ -141,17 +141,17 @@ export default function EditProductPage() {
     }
   };
 
-  if (loading) return <div className="py-12 text-center text-gray-500">Loading...</div>;
-  if (!product) return <div className="py-12 text-center text-gray-500">Product not found</div>;
+  if (loading) return <div className="py-12 text-center text-muted-foreground">Loading...</div>;
+  if (!product) return <div className="py-12 text-center text-muted-foreground">Product not found</div>;
 
   return (
     <div className="space-y-6 max-w-4xl pb-20">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/products" className="text-gray-500 hover:text-foreground">
+          <Link href="/products" className="text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-5 w-5" />
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900">Edit Product</h1>
+          <h1 className="text-2xl font-bold text-foreground">Edit Product</h1>
         </div>
         {hasPermission("products:write") && (
           <div className="flex gap-3">
@@ -218,7 +218,7 @@ export default function EditProductPage() {
             </CardHeader>
             <CardContent className="space-y-6">
               {product.variants.map((v, i) => (
-                <div key={v._id || i} className="p-4 border border-gray-200 rounded-lg space-y-4 relative">
+                <div key={v._id || i} className="p-4 border border-border rounded-lg space-y-4 relative">
                   {product.variants.length > 1 && (
                     <button 
                       type="button" 

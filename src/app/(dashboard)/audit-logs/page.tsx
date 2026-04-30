@@ -41,8 +41,8 @@ export default function AuditLogsPage() {
       title: "Actor",
       render: (log: AuditLog) => (
         <div>
-          <p className="font-medium text-gray-900">{log.actor_name || "Unknown"}</p>
-          <p className="text-xs text-gray-500">{log.actor_type}</p>
+          <p className="font-medium text-foreground">{log.actor_name || "Unknown"}</p>
+          <p className="text-xs text-muted-foreground">{log.actor_type}</p>
         </div>
       ),
     },
@@ -50,7 +50,7 @@ export default function AuditLogsPage() {
       key: "action",
       title: "Action",
       render: (log: AuditLog) => (
-        <span className="text-sm text-gray-900">{log.action}</span>
+        <span className="text-sm text-foreground">{log.action}</span>
       ),
     },
     {
@@ -58,9 +58,9 @@ export default function AuditLogsPage() {
       title: "Entity",
       render: (log: AuditLog) => (
         <div>
-          <p className="text-sm text-gray-900">{log.entity_type}</p>
+          <p className="text-sm text-foreground">{log.entity_type}</p>
           {log.entity_id && (
-            <p className="text-xs text-gray-500">{log.entity_id}</p>
+            <p className="text-xs text-muted-foreground">{log.entity_id}</p>
           )}
         </div>
       ),
@@ -80,7 +80,7 @@ export default function AuditLogsPage() {
       render: (log: AuditLog) => (
         <a
           href={`/audit-logs/${log._id}`}
-          className="text-sm text-blue-600 hover:text-blue-500"
+          className="text-sm text-primary hover:text-blue-500"
         >
           View
         </a>
@@ -90,7 +90,7 @@ export default function AuditLogsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Audit Logs</h1>
+      <h1 className="text-2xl font-bold text-foreground">Audit Logs</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div>

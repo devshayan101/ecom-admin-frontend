@@ -33,7 +33,7 @@ export default function NewCustomerPage() {
         name,
         email,
         phone,
-        address: { street, city, state, postcode, country },
+        address: { recipient_name: name, street, city, state, postcode, country },
       };
       await apiPost("/customers", payload);
       router.push("/customers");
@@ -47,10 +47,10 @@ export default function NewCustomerPage() {
   return (
     <div className="space-y-6 max-w-2xl">
       <div className="flex items-center gap-4">
-        <Link href="/customers" className="text-gray-500 hover:text-foreground">
+        <Link href="/customers" className="text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-5 w-5" />
         </Link>
-        <h1 className="text-2xl font-bold text-gray-900">New Customer</h1>
+        <h1 className="text-2xl font-bold text-foreground">New Customer</h1>
       </div>
 
       <Card>

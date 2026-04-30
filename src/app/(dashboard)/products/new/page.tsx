@@ -123,10 +123,10 @@ export default function NewProductPage() {
   return (
     <div className="space-y-6 max-w-4xl pb-20">
       <div className="flex items-center gap-4">
-        <Link href="/products" className="text-gray-500 hover:text-foreground">
+        <Link href="/products" className="text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-5 w-5" />
         </Link>
-        <h1 className="text-2xl font-bold text-gray-900">New Product</h1>
+        <h1 className="text-2xl font-bold text-foreground">New Product</h1>
       </div>
 
       {error && (
@@ -172,7 +172,7 @@ export default function NewProductPage() {
                     onRemove={() => {}} 
                   />
                 </div>
-                <p className="text-xs text-gray-500 mt-2">Add up to 10 images. These will be shown on the product page.</p>
+                <p className="text-xs text-muted-foreground mt-2">Add up to 10 images. These will be shown on the product page.</p>
               </CardContent>
             </Card>
 
@@ -187,7 +187,7 @@ export default function NewProductPage() {
               </CardHeader>
               <CardContent className="space-y-6">
                 {variants.map((v, i) => (
-                  <div key={i} className="p-4 border border-gray-200 rounded-lg space-y-4 relative">
+                  <div key={i} className="p-4 border border-border rounded-lg space-y-4 relative">
                     {variants.length > 1 && (
                       <button 
                         type="button" 

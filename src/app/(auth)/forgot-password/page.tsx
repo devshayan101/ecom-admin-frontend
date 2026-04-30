@@ -43,7 +43,7 @@ export default function ForgotPasswordPage() {
           <p className="text-sm text-foreground">
             If an account with that email exists, we've sent password reset instructions.
           </p>
-          <Link href="/login" className="text-sm text-blue-600 hover:text-blue-500">
+          <Link href="/login" className="text-sm text-primary hover:text-blue-500">
             Back to sign in
           </Link>
         </div>
@@ -78,13 +78,13 @@ export default function ForgotPasswordPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:opacity-50"
+          className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary/100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:opacity-50"
         >
           {loading ? "Sending..." : "Send reset instructions"}
         </button>
 
         <div className="text-center">
-          <Link href="/login" className="text-sm text-blue-600 hover:text-blue-500">
+          <Link href="/login" className="text-sm text-primary hover:text-blue-500">
             Back to sign in
           </Link>
         </div>

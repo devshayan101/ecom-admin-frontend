@@ -29,8 +29,8 @@ export default function CustomersPage() {
       title: "Name",
       render: (c: Customer) => (
         <div>
-          <p className="font-medium text-gray-900">{c.name}</p>
-          <p className="text-xs text-gray-500">{c.email}</p>
+          <p className="font-medium text-foreground">{c.name}</p>
+          <p className="text-xs text-muted-foreground">{c.email}</p>
         </div>
       ),
     },
@@ -49,7 +49,7 @@ export default function CustomersPage() {
       render: (c: Customer) => (
         <button
           onClick={() => router.push(`/customers/${c._id}`)}
-          className="text-sm text-blue-600 hover:text-blue-500"
+          className="text-sm text-primary hover:text-blue-500"
         >
           View
         </button>
@@ -60,7 +60,7 @@ export default function CustomersPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Customers</h1>
+        <h1 className="text-2xl font-bold text-foreground">Customers</h1>
         <Link href="/customers/new">
           <Button>New Customer</Button>
         </Link>

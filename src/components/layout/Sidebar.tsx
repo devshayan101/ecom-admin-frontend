@@ -45,14 +45,14 @@ export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className={`flex flex-col border-r border-gray-200 bg-white transition-width duration-300 ${collapsed ? "w-16" : "w-64"}`}>
-      <div className="flex items-center justify-between px-4 py-4 border-b border-gray-200">
-        {!collapsed && <span className="text-lg font-bold text-gray-900">Admin</span>}
+    <div className={`flex flex-col border-r border-border bg-background transition-all duration-300 ${collapsed ? "w-16" : "w-64"}`}>
+      <div className="flex items-center justify-between px-4 py-4 border-b border-border">
+        {!collapsed && <span className="text-lg font-bold text-foreground">Admin</span>}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="rounded-md p-1 hover:bg-gray-100"
+          className="rounded-md p-1 hover:bg-accent cursor-pointer"
         >
-          {collapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
+          {collapsed ? <ChevronRight className="h-5 w-5 text-muted-foreground" /> : <ChevronLeft className="h-5 w-5 text-muted-foreground" />}
         </button>
       </div>
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
@@ -65,12 +65,14 @@ export default function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors
-                ${isActive ? "bg-blue-50 text-blue-700" : "text-foreground hover:bg-gray-100"}
+              className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all
+                ${isActive ? "bg-primary/10 text-primary shadow-sm" : "text-muted-foreground hover:bg-accent hover:text-foreground"}
                 ${collapsed ? "justify-center" : ""}`}
             >
-              {item.icon}
-              {!collapsed && item.label}
+              <span className={`${isActive ? "text-primary" : "text-muted-foreground"}`}>
+                {item.icon}
+              </span>
+              {!collapsed && <span>{item.label}</span>}
             </Link>
           );
         })}

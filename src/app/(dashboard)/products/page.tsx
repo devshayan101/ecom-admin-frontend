@@ -35,7 +35,7 @@ export default function ProductsPage() {
       title: "Product",
       render: (p: Product) => (
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-md border border-gray-200 overflow-hidden bg-gray-50 flex-shrink-0">
+          <div className="w-10 h-10 rounded-md border border-border overflow-hidden bg-muted/50 flex-shrink-0">
             {p.images && p.images[0] ? (
               <img src={p.images[0]} alt="" className="w-full h-full object-cover" />
             ) : (
@@ -45,8 +45,8 @@ export default function ProductsPage() {
             )}
           </div>
           <div>
-            <p className="font-medium text-gray-900">{p.name}</p>
-            <p className="text-xs text-gray-500">{p.sku || p._id}</p>
+            <p className="font-medium text-foreground">{p.name}</p>
+            <p className="text-xs text-muted-foreground">{p.variants?.[0]?.sku || p._id}</p>
           </div>
         </div>
       ),
@@ -76,7 +76,7 @@ export default function ProductsPage() {
       render: (p: Product) => (
         <button
           onClick={() => router.push(`/products/${p._id}`)}
-          className="text-sm text-blue-600 hover:text-blue-500"
+          className="text-sm text-primary hover:text-blue-500"
         >
           Edit
         </button>
@@ -87,7 +87,7 @@ export default function ProductsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Products</h1>
+        <h1 className="text-2xl font-bold text-foreground">Products</h1>
         <Link href="/products/new">
           <Button><Plus className="h-4 w-4 mr-2" /> New Product</Button>
         </Link>

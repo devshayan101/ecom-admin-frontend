@@ -5,14 +5,14 @@ interface CardProps {
 
 export function Card({ children, className = "" }: CardProps) {
   return (
-    <div className={`rounded-lg border border-gray-200 bg-white shadow-sm ${className}`}>
+    <div className={`rounded-xl border border-border bg-background shadow-md transition-all duration-200 hover:shadow-lg ${className}`}>
       {children}
     </div>
   );
 }
 
 export function CardHeader({ children, className = "" }: CardProps) {
-  return <div className={`px-6 py-4 border-b border-gray-200 ${className}`}>{children}</div>;
+  return <div className={`px-6 py-4 border-b border-border/50 ${className}`}>{children}</div>;
 }
 
 export function CardContent({ children, className = "" }: CardProps) {
@@ -20,5 +20,5 @@ export function CardContent({ children, className = "" }: CardProps) {
 }
 
 export function CardTitle({ children, className = "" }: CardProps) {
-  return <h3 className={`text-lg font-semibold text-gray-900 ${className}`}>{children}</h3>;
+  return <h3 className={`text-sm font-medium text-muted-foreground uppercase tracking-wider ${className}`}>{children}</h3>;
 }

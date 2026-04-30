@@ -13,7 +13,7 @@ export default function Select({ label, error, options, className = "", ...props
         </label>
       )}
       <select
-        className={`block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-foreground bg-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 ${error ? "border-red-500" : ""} ${className}`}
+        className={`block w-full rounded-md border border-border px-3 py-2 text-sm text-foreground bg-background focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary ${error ? "border-destructive" : ""} ${className} cursor-pointer`}
         {...props}
       >
         {options.map((opt) => (
@@ -22,7 +22,7 @@ export default function Select({ label, error, options, className = "", ...props
           </option>
         ))}
       </select>
-      {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+      {error && <p className="mt-1 text-sm text-destructive">{error}</p>}
     </div>
   );
 }

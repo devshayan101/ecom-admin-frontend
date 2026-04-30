@@ -25,8 +25,8 @@ export default function CategoriesPage() {
       title: "Name",
       render: (cat: Category) => (
         <div>
-          <p className="font-medium text-gray-900">{cat.name}</p>
-          <p className="text-xs text-gray-500">{cat.slug}</p>
+          <p className="font-medium text-foreground">{cat.name}</p>
+          <p className="text-xs text-muted-foreground">{cat.slug}</p>
         </div>
       ),
     },
@@ -47,7 +47,7 @@ export default function CategoriesPage() {
       render: (cat: Category) => (
         <button
           onClick={() => router.push(`/categories/${cat._id}`)}
-          className="text-sm text-blue-600 hover:text-blue-500"
+          className="text-sm text-primary hover:text-blue-500"
         >
           Edit
         </button>
@@ -58,7 +58,7 @@ export default function CategoriesPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Categories</h1>
+        <h1 className="text-2xl font-bold text-foreground">Categories</h1>
         <Link href="/categories/new">
           <Button>New Category</Button>
         </Link>

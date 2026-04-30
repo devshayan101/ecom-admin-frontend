@@ -7,15 +7,15 @@ import { BarChart2, Boxes } from "lucide-react";
 export default function ReportsPage() {
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Reports</h1>
+      <h1 className="text-2xl font-bold text-foreground">Reports</h1>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Link href="/reports/sales" className="block">
           <Card className="hover:shadow-lg transition-shadow cursor-pointer">
             <CardHeader>
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <BarChart2 className="h-6 w-6 text-blue-600" />
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <BarChart2 className="h-6 w-6 text-primary" />
                 </div>
                 <CardTitle>Sales Report</CardTitle>
               </div>

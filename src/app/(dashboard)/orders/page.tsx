@@ -32,8 +32,8 @@ export default function OrdersPage() {
       title: "Customer",
       render: (o: Order) => (
         <div>
-          <p className="font-medium text-gray-900">{o.customer_name || "Customer"}</p>
-          <p className="text-xs text-gray-500">{o.customer_id}</p>
+          <p className="font-medium text-foreground">{o.customer_name || "Customer"}</p>
+          <p className="text-xs text-muted-foreground">{o.customer_id}</p>
         </div>
       ),
     },
@@ -66,7 +66,7 @@ export default function OrdersPage() {
       render: (o: Order) => (
         <button
           onClick={() => router.push(`/orders/${o._id}`)}
-          className="text-sm text-blue-600 hover:text-blue-500"
+          className="text-sm text-primary hover:text-blue-500"
         >
           View
         </button>
@@ -76,7 +76,7 @@ export default function OrdersPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Orders</h1>
+      <h1 className="text-2xl font-bold text-foreground">Orders</h1>
 
       <div className="flex gap-4 items-end">
         <div className="flex-1">

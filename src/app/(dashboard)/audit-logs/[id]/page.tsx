@@ -33,15 +33,15 @@ export default function AuditLogDetailPage() {
 
   if (loading) return <div className="py-12 text-center"><LoadingSpinner /></div>;
   if (error) return <div className="py-12 text-center text-red-600">{error}</div>;
-  if (!log) return <div className="py-12 text-center text-gray-500">Log entry not found</div>;
+  if (!log) return <div className="py-12 text-center text-muted-foreground">Log entry not found</div>;
 
   return (
     <div className="space-y-6 max-w-4xl">
       <div className="flex items-center gap-4">
-        <button onClick={() => router.back()} className="text-gray-500 hover:text-foreground">
+        <button onClick={() => router.back()} className="text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <h1 className="text-2xl font-bold text-gray-900">Audit Log Detail</h1>
+        <h1 className="text-2xl font-bold text-foreground">Audit Log Detail</h1>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -152,7 +152,7 @@ export default function AuditLogDetailPage() {
               {log.changes.before && (
                 <div>
                   <h4 className="text-sm font-medium text-foreground mb-2">Before</h4>
-                  <pre className="bg-gray-50 p-3 rounded-md text-xs overflow-x-auto">
+                  <pre className="bg-muted/50 p-3 rounded-md text-xs overflow-x-auto">
                     {JSON.stringify(log.changes.before, null, 2)}
                   </pre>
                 </div>
@@ -160,7 +160,7 @@ export default function AuditLogDetailPage() {
               {log.changes.after && (
                 <div>
                   <h4 className="text-sm font-medium text-foreground mb-2">After</h4>
-                  <pre className="bg-gray-50 p-3 rounded-md text-xs overflow-x-auto">
+                  <pre className="bg-muted/50 p-3 rounded-md text-xs overflow-x-auto">
                     {JSON.stringify(log.changes.after, null, 2)}
                   </pre>
                 </div>

@@ -24,7 +24,7 @@ export default function Table<T>({
 }: TableProps<T>) {
   if (loading) {
     return (
-      <div className="text-center py-12 text-sm text-gray-500">
+      <div className="text-center py-12 text-sm text-muted-foreground">
         Loading...
       </div>
     );
@@ -32,7 +32,7 @@ export default function Table<T>({
 
   if (data.length === 0) {
     return (
-      <div className="text-center py-12 text-sm text-gray-500">
+      <div className="text-center py-12 text-sm text-muted-foreground">
         {emptyMessage}
       </div>
     );
@@ -41,7 +41,7 @@ export default function Table<T>({
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm text-left text-foreground">
-        <thead className="bg-gray-50 text-xs text-gray-500 uppercase">
+        <thead className="bg-muted/50 text-xs text-muted-foreground uppercase">
           <tr>
             {columns.map((col) => (
               <th key={col.key} className={`px-6 py-3 ${col.className || ""}`}>
@@ -50,11 +50,11 @@ export default function Table<T>({
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-200">
+        <tbody className="divide-y divide-border">
           {data.map((item) => (
             <tr
               key={keyExtractor(item)}
-              className={onRowClick ? "hover:bg-gray-50 cursor-pointer" : ""}
+              className={onRowClick ? "hover:bg-muted/50 cursor-pointer" : ""}
               onClick={() => onRowClick?.(item)}
             >
               {columns.map((col) => (
