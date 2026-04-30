@@ -8,7 +8,7 @@ import type { InventoryItem } from "@/lib/types";
 import Table from "@/components/ui/Table";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 
 export default function InventoryPage() {
   const router = useRouter();
@@ -36,7 +36,7 @@ export default function InventoryPage() {
       key: "sku",
       title: "SKU",
       render: (item: InventoryItem) => (
-        <span className="text-sm text-gray-600">{item.sku}</span>
+        <span className="text-sm text-foreground">{item.sku}</span>
       ),
     },
     {
@@ -50,7 +50,7 @@ export default function InventoryPage() {
       key: "reserved",
       title: "Reserved",
       render: (item: InventoryItem) => (
-        <span className="text-sm text-gray-600">{item.reserved}</span>
+        <span className="text-sm text-foreground">{item.reserved}</span>
       ),
     },
     {
@@ -94,7 +94,7 @@ export default function InventoryPage() {
 
       <div className="flex gap-4 items-end">
         <div className="flex-1">
-          <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="search" className="block text-sm font-medium text-foreground mb-1">
             Search
           </label>
           <input

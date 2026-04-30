@@ -40,7 +40,7 @@ export default function ForgotPasswordPage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
             </svg>
           </div>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-foreground">
             If an account with that email exists, we've sent password reset instructions.
           </p>
           <Link href="/login" className="text-sm text-blue-600 hover:text-blue-500">
@@ -61,7 +61,7 @@ export default function ForgotPasswordPage() {
         )}
 
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="email" className="block text-sm font-medium text-foreground">
             Email
           </label>
           <input

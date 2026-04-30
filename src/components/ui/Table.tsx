@@ -40,7 +40,7 @@ export default function Table<T>({
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm text-left text-gray-700">
+      <table className="w-full text-sm text-left text-foreground">
         <thead className="bg-gray-50 text-xs text-gray-500 uppercase">
           <tr>
             {columns.map((col) => (

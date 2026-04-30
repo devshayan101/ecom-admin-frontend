@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Card from "@/components/ui/Card";
-import { CardHeader, CardContent, CardTitle } from "@/components/ui/Card";
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/Card";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { apiGet } from "@/lib/api-client";
 import type { DashboardSummary } from "@/lib/types";
 import dayjs from "dayjs";
@@ -93,7 +92,7 @@ export default function DashboardPage() {
             <div className="space-y-2">
               {Object.entries(orderCounts).map(([status, count]) => (
                 <div key={status} className="flex justify-between">
-                  <span className="text-sm text-gray-600">{status}</span>
+                  <span className="text-sm text-foreground">{status}</span>
                   <span className="text-sm font-medium">{count}</span>
                 </div>
               ))}

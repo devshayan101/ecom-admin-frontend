@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { apiGet } from "@/lib/api-client";
 import type { SalesReport } from "@/lib/types";
 import { getApiError } from "@/lib/api-client";
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import dayjs from "dayjs";
@@ -53,7 +53,7 @@ export default function SalesReportPage() {
             className="flex gap-4 items-end"
           >
             <div>
-              <label htmlFor="start" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="start" className="block text-sm font-medium text-foreground mb-1">
                 Start Date
               </label>
               <input
@@ -66,7 +66,7 @@ export default function SalesReportPage() {
               />
             </div>
             <div>
-              <label htmlFor="end" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="end" className="block text-sm font-medium text-foreground mb-1">
                 End Date
               </label>
               <input
@@ -149,7 +149,7 @@ export default function SalesReportPage() {
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
                             ${day.revenue?.toFixed(2)}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 text-right">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground text-right">
                             {day.orders}
                           </td>
                         </tr>
@@ -194,7 +194,7 @@ export default function SalesReportPage() {
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {product.sku}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 text-right">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground text-right">
                             {product.units_sold}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">

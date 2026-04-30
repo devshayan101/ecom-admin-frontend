@@ -16,7 +16,7 @@ import { PRODUCT_STATUS_LABELS } from "@/lib/constants";
 export default function CategoriesPage() {
   const router = useRouter();
   const { items: categories, loading, error, loadMore, hasMore, reset } = usePagination<Category>(
-    (params) => apiGetPaginated<{ items: Category[]; next_cursor?: string; has_more: boolean }>("/categories", params)
+    (params) => apiGetPaginated<Category>("/categories", params)
   );
 
   const columns = [

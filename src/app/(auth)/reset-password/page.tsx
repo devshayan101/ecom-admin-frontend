@@ -64,7 +64,7 @@ export default function ResetPasswordPage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
             </svg>
           </div>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-foreground">
             Your password has been reset successfully.
           </p>
           <a
@@ -88,7 +88,7 @@ export default function ResetPasswordPage() {
         )}
 
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="password" className="block text-sm font-medium text-foreground">
             New Password
           </label>
           <input
@@ -103,7 +103,7 @@ export default function ResetPasswordPage() {
         </div>
 
         <div>
-          <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="confirm-password" className="block text-sm font-medium text-foreground">
             Confirm Password
           </label>
           <input

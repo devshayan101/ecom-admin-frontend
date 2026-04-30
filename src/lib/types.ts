@@ -25,6 +25,7 @@ export interface ProductVariant {
   _id: string;
   sku: string;
   price: number;
+  image?: string;
   attributes: Record<string, any>;
 }
 
@@ -273,5 +274,5 @@ export interface ApiError {
 
 export interface UploadUrlResponse {
   uploadUrl: string;
-  fileUrl: string;
+  objectUrl: string;
 }

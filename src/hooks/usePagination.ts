@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { PaginatedResponse } from "@/lib/types";
 import { buildPaginationParams, createPaginationState } from "@/lib/pagination";
 
@@ -39,6 +39,10 @@ export function usePagination<T>(
     },
     [loading, state, fetcher]
   );
+
+  useEffect(() => {
+    load({}, true);
+  }, []); // Only on mount
 
   const loadMore = useCallback(() => {
     if (state.hasMore && !loading) {

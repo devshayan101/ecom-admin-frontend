@@ -13,7 +13,7 @@ export default function AuthLayout({ children, title, subtitle }: AuthLayoutProp
             {title}
           </h1>
           {subtitle && (
-            <p className="mt-2 text-sm text-gray-600">{subtitle}</p>
+            <p className="mt-2 text-sm text-foreground">{subtitle}</p>
           )}
         </div>
         <div className="bg-white px-6 py-8 shadow sm:rounded-lg sm:px-8">

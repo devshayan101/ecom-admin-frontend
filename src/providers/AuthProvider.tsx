@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { getToken, parseJwt, getUserPermissions } from "@/lib/auth";
+import { useAuth } from "@/hooks/useAuth";
 import { AdminUser } from "@/lib/types";
 
 interface AuthContextType {

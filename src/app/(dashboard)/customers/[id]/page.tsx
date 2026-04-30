@@ -4,13 +4,14 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { apiGet, apiPut, apiDelete, getApiError } from "@/lib/api-client";
-import type { Customer } from "@/lib/types";
+import type { Customer, Address } from "@/lib/types";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Badge from "@/components/ui/Badge";
-import { Card, CardHeader, CardContent } from "@/components/ui/Card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import { useAuthContext } from "@/providers/AuthProvider";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 
 export default function CustomerProfilePage() {
   const { id } = useParams();
@@ -67,14 +68,33 @@ export default function CustomerProfilePage() {
     }
   };
 
-  if (loading) return <div className="py-12 text-center">Loading...</div>;
+  const updateAddress = (field: string, value: string) => {
+    if (!customer) return;
+    const currentAddress: Address = customer.address || {
+      recipient_name: customer.name,
+      street: "",
+      city: "",
+      state: "",
+      postcode: "",
+      country: "",
+    };
+    setCustomer({
+      ...customer,
+      address: {
+        ...currentAddress,
+        [field]: value,
+      },
+    });
+  };
+
+  if (loading) return <div className="py-12 text-center"><LoadingSpinner /></div>;
   if (!customer) return <div className="py-12 text-center">Customer not found</div>;
 
   return (
     <div className="space-y-6 max-w-2xl">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/customers" className="text-gray-500 hover:text-gray-700">
+          <Link href="/customers" className="text-gray-500 hover:text-foreground">
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <h1 className="text-2xl font-bold text-gray-900">Customer Profile</h1>
@@ -104,19 +124,46 @@ export default function CustomerProfilePage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSave} className="space-y-4">
-            <Input label="Name" value={customer.name} onChange={(e) => setCustomer({...customer, name: e.target.value})} required />
-            <Input label="Email" type="email" value={customer.email} onChange={(e) => setCustomer({...customer, email: e.target.value})} required />
-            <Input label="Phone" value={customer.phone || ""} onChange={(e) => setCustomer({...customer, phone: e.target.value})} />
+            <Input
+              label="Name"
+              value={customer.name}
+              onChange={(e) => setCustomer({ ...customer, name: e.target.value })}
+              required
+            />
+            <Input
+              label="Email"
+              type="email"
+              value={customer.email}
+              onChange={(e) => setCustomer({ ...customer, email: e.target.value })}
+              required
+            />
+            <Input
+              label="Phone"
+              value={customer.phone || ""}
+              onChange={(e) => setCustomer({ ...customer, phone: e.target.value })}
+            />
 
             {customer.address && (
-              <>
+              <div className="space-y-4">
                 <h3 className="text-lg font-semibold pt-4">Address</h3>
-                <Input label="Street" value={customer.address.street || ""} onChange={(e) => setCustomer({...customer, address: {...customer.address, street: e.target.value})} />
+                <Input
+                  label="Street"
+                  value={customer.address.street || ""}
+                  onChange={(e) => updateAddress("street", e.target.value)}
+                />
                 <div className="grid grid-cols-2 gap-4">
-                  <Input label="City" value={customer.address.city || ""} onChange={(e) => setCustomer({...customer, address: {...customer.address, city: e.target.value})} />
-                  <Input label="State" value={customer.address.state || ""} onChange={(e) => setCustomer({...customer, address: {...customer.address, state: e.target.value})} />
+                  <Input
+                    label="City"
+                    value={customer.address.city || ""}
+                    onChange={(e) => updateAddress("city", e.target.value)}
+                  />
+                  <Input
+                    label="State"
+                    value={customer.address.state || ""}
+                    onChange={(e) => updateAddress("state", e.target.value)}
+                  />
                 </div>
-              </>
+              </div>
             )}
 
             {hasPermission("customers:write") && (

@@ -4,23 +4,26 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiPost, apiGet, getApiError } from "@/lib/api-client";
-import type { Category, CreateProductRequest } from "@/lib/types";
+import type { Category, CreateProductRequest, AttributeSchema } from "@/lib/types";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
+import Textarea from "@/components/ui/Textarea";
 import { Card, CardHeader, CardContent } from "@/components/ui/Card";
-import { ArrowLeft, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, X } from "lucide-react";
+import ImageUpload from "@/components/ImageUpload";
 
 export default function NewProductPage() {
   const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
+  const [categorySchema, setCategorySchema] = useState<AttributeSchema[]>([]);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [status, setStatus] = useState<"active" | "draft">("draft");
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
-  const [variants, setVariants] = useState<{ sku: string; price: string; attributes: Record<string, string> }[]>([
+  const [variants, setVariants] = useState<{ sku: string; price: string; image?: string; attributes: Record<string, any> }[]>([
     { sku: "", price: "", attributes: {} },
   ]);
   const [images, setImages] = useState<string[]>([]);
@@ -28,20 +31,52 @@ export default function NewProductPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    apiGet<Category[]>("/categories?limit=100").then(setCategories).catch(console.error);
+    apiGet<{ items: Category[] }>("/categories?limit=100")
+      .then((data) => setCategories(data.items || []))
+      .catch(console.error);
   }, []);
 
+  useEffect(() => {
+    if (categoryId) {
+      const category = categories.find(c => c._id === categoryId);
+      if (category) {
+        setCategorySchema(category.attribute_schema || []);
+        // Update existing variants to include new attributes if missing
+        setVariants(prev => prev.map(v => {
+          const newAttrs = { ...v.attributes };
+          category.attribute_schema?.forEach(attr => {
+            if (newAttrs[attr.key] === undefined) {
+              newAttrs[attr.key] = attr.type === 'boolean' ? false : (attr.type === 'number' ? 0 : "");
+            }
+          });
+          return { ...v, attributes: newAttrs };
+        }));
+      }
+    } else {
+      setCategorySchema([]);
+    }
+  }, [categoryId, categories]);
+
   const addVariant = () => {
-    setVariants([...variants, { sku: "", price: "", attributes: {} }]);
+    const initialAttrs: Record<string, any> = {};
+    categorySchema.forEach(attr => {
+      initialAttrs[attr.key] = attr.type === 'boolean' ? false : (attr.type === 'number' ? 0 : "");
+    });
+    setVariants([...variants, { sku: "", price: "", attributes: initialAttrs }]);
   };
 
   const removeVariant = (index: number) => {
     setVariants(variants.filter((_, i) => i !== index));
   };
 
-  const updateVariant = (index: number, field: string, value: string) => {
+  const updateVariant = (index: number, field: string, value: any) => {
     const newVariants = [...variants];
-    (newVariants[index] as any)[field] = value;
+    if (field.startsWith("attributes.")) {
+      const attrKey = field.split(".")[1];
+      newVariants[index].attributes[attrKey] = value;
+    } else {
+      (newVariants[index] as any)[field] = value;
+    }
     setVariants(newVariants);
   };
 
@@ -50,6 +85,10 @@ export default function NewProductPage() {
       setTags([...tags, tagInput]);
       setTagInput("");
     }
+  };
+
+  const removeTag = (tag: string) => {
+    setTags(tags.filter(t => t !== tag));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -68,6 +107,7 @@ export default function NewProductPage() {
         variants: variants.map((v) => ({
           sku: v.sku,
           price: parseFloat(v.price) || 0,
+          image: v.image,
           attributes: v.attributes,
         })),
       };
@@ -81,9 +121,9 @@ export default function NewProductPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="space-y-6 max-w-4xl pb-20">
       <div className="flex items-center gap-4">
-        <Link href="/products" className="text-gray-500 hover:text-gray-700">
+        <Link href="/products" className="text-gray-500 hover:text-foreground">
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <h1 className="text-2xl font-bold text-gray-900">New Product</h1>
@@ -96,83 +136,205 @@ export default function NewProductPage() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <Card>
-          <CardHeader><h2 className="text-lg font-semibold">Basic Info</h2></CardHeader>
-          <CardContent className="space-y-4">
-            <Input label="Name" id="name" value={name} onChange={(e) => setName(e.target.value)} required />
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                rows={3}
-              />
-            </div>
-            <Select
-              label="Category"
-              id="category"
-              value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-              options={[
-                { value: "", label: "Select category..." },
-                ...categories.map((c) => ({ value: c._id, label: c.name })),
-              ]}
-              required
-            />
-            <Select
-              label="Status"
-              id="status"
-              value={status}
-              onChange={(e) => setStatus(e.target.value as any)}
-              options={[
-                { value: "draft", label: "Draft" },
-                { value: "active", label: "Active" },
-              ]}
-            />
-          </CardContent>
-        </Card>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="md:col-span-2 space-y-6">
+            <Card>
+              <CardHeader><h2 className="text-lg font-semibold">Basic Info</h2></CardHeader>
+              <CardContent className="space-y-4">
+                <Input label="Name" id="name" value={name} onChange={(e) => setName(e.target.value)} required />
+                <Textarea
+                  label="Description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={5}
+                />
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardHeader><h2 className="text-lg font-semibold">Variants</h2></CardHeader>
-          <CardContent className="space-y-4">
-            {variants.map((v, i) => (
-              <div key={i} className="p-4 border border-gray-200 rounded-md space-y-3">
-                <div className="flex gap-4">
-                  <Input
-                    label="SKU"
-                    value={v.sku}
-                    onChange={(e) => updateVariant(i, "sku", e.target.value)}
-                    className="flex-1"
-                    required
+            <Card>
+              <CardHeader><h2 className="text-lg font-semibold">Product Images</h2></CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-4">
+                  {images.map((img, i) => (
+                    <div key={i} className="relative w-24 h-24 border rounded-md overflow-hidden group">
+                      <img src={img} alt={`Product ${i}`} className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => setImages(images.filter((_, idx) => idx !== i))}
+                        className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                  <ImageUpload 
+                    onChange={(url) => setImages([...images, url])} 
+                    onRemove={() => {}} 
                   />
-                  <Input
-                    label="Price"
-                    value={v.price}
-                    onChange={(e) => updateVariant(i, "price", e.target.value)}
-                    type="number"
-                    className="w-32"
-                    required
-                  />
-                  {variants.length > 1 && (
-                    <button type="button" onClick={() => removeVariant(i)} className="mt-6 text-red-600">
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  )}
                 </div>
-              </div>
-            ))}
-            <Button type="button" variant="secondary" onClick={addVariant}>
-              <Plus className="h-4 w-4 mr-2" /> Add Variant
-            </Button>
-          </CardContent>
-        </Card>
+                <p className="text-xs text-gray-500 mt-2">Add up to 10 images. These will be shown on the product page.</p>
+              </CardContent>
+            </Card>
 
-        <div className="flex gap-3">
-          <Button type="submit" loading={loading}>Create Product</Button>
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold">Variants</h2>
+                  <Button type="button" variant="secondary" size="sm" onClick={addVariant}>
+                    <Plus className="h-4 w-4 mr-2" /> Add Variant
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {variants.map((v, i) => (
+                  <div key={i} className="p-4 border border-gray-200 rounded-lg space-y-4 relative">
+                    {variants.length > 1 && (
+                      <button 
+                        type="button" 
+                        onClick={() => removeVariant(i)} 
+                        className="absolute top-2 right-2 text-gray-400 hover:text-red-600 transition-colors"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    )}
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div className="md:col-span-1">
+                        <ImageUpload
+                          label="Variant Image"
+                          value={v.image}
+                          onChange={(url) => updateVariant(i, "image", url)}
+                          onRemove={() => updateVariant(i, "image", undefined)}
+                        />
+                      </div>
+                      <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <Input
+                          label="SKU"
+                          value={v.sku}
+                          onChange={(e) => updateVariant(i, "sku", e.target.value)}
+                          placeholder="e.g. TSHIRT-RED-M"
+                          required
+                        />
+                        <Input
+                          label="Price"
+                          value={v.price}
+                          onChange={(e) => updateVariant(i, "price", e.target.value)}
+                          type="number"
+                          step="0.01"
+                          placeholder="0.00"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    {categorySchema.length > 0 && (
+                      <div className="pt-4 border-t border-gray-100">
+                        <h3 className="text-sm font-medium text-gray-700 mb-3">Attributes</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          {categorySchema.map((attr) => (
+                            <div key={attr.key}>
+                              {attr.type === 'enum' ? (
+                                <Select
+                                  label={attr.key}
+                                  value={v.attributes[attr.key] || ""}
+                                  onChange={(e) => updateVariant(i, `attributes.${attr.key}`, e.target.value)}
+                                  options={[
+                                    { value: "", label: `Select ${attr.key}...` },
+                                    ...(attr.values || []).map(val => ({ value: val, label: val }))
+                                  ]}
+                                />
+                              ) : attr.type === 'boolean' ? (
+                                <div className="flex items-center gap-2 mt-8">
+                                  <input
+                                    type="checkbox"
+                                    id={`attr-${i}-${attr.key}`}
+                                    checked={!!v.attributes[attr.key]}
+                                    onChange={(e) => updateVariant(i, `attributes.${attr.key}`, e.target.checked)}
+                                    className="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4"
+                                  />
+                                  <label htmlFor={`attr-${i}-${attr.key}`} className="text-sm font-medium text-gray-700">
+                                    {attr.key}
+                                  </label>
+                                </div>
+                              ) : (
+                                <Input
+                                  label={attr.key}
+                                  type={attr.type === 'number' ? 'number' : 'text'}
+                                  value={v.attributes[attr.key] || ""}
+                                  onChange={(e) => updateVariant(i, `attributes.${attr.key}`, attr.type === 'number' ? parseFloat(e.target.value) : e.target.value)}
+                                />
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="space-y-6">
+            <Card>
+              <CardHeader><h2 className="text-lg font-semibold">Organization</h2></CardHeader>
+              <CardContent className="space-y-4">
+                <Select
+                  label="Category"
+                  id="category"
+                  value={categoryId}
+                  onChange={(e) => setCategoryId(e.target.value)}
+                  options={[
+                    { value: "", label: "Select category..." },
+                    ...categories.map((c) => ({ value: c._id, label: c.name })),
+                  ]}
+                  required
+                />
+                <Select
+                  label="Status"
+                  id="status"
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value as any)}
+                  options={[
+                    { value: "draft", label: "Draft" },
+                    { value: "active", label: "Active" },
+                  ]}
+                />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader><h2 className="text-lg font-semibold">Tags</h2></CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex gap-2">
+                  <Input
+                    value={tagInput}
+                    onChange={(e) => setTagInput(e.target.value)}
+                    placeholder="Add a tag..."
+                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+                  />
+                  <Button type="button" variant="secondary" onClick={addTag}>Add</Button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {tags.map((tag) => (
+                    <span key={tag} className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-700 rounded-md text-xs">
+                      {tag}
+                      <button type="button" onClick={() => removeTag(tag)} className="text-gray-400 hover:text-gray-600">
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        <div className="flex gap-3 justify-end border-t pt-6">
           <Link href="/products">
             <Button type="button" variant="secondary">Cancel</Button>
           </Link>
+          <Button type="submit" loading={loading} className="px-8">Create Product</Button>
         </div>
       </form>
     </div>

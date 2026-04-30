@@ -78,7 +78,7 @@ export default function EditCategoryPage() {
     <div className="space-y-6 max-w-2xl">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/categories" className="text-gray-500 hover:text-gray-700">
+          <Link href="/categories" className="text-gray-500 hover:text-foreground">
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <h1 className="text-2xl font-bold text-gray-900">Edit Category</h1>
@@ -114,7 +114,7 @@ export default function EditCategoryPage() {
             />
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 Attribute Schema
               </label>
               <div className="space-y-2">

@@ -21,7 +21,7 @@ export default function ReportsPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-foreground">
                 View sales revenue, order counts, and top products by date range.
               </p>
             </CardContent>
@@ -39,7 +39,7 @@ export default function ReportsPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-foreground">
                 View low stock items and inventory summary.
               </p>
             </CardContent>

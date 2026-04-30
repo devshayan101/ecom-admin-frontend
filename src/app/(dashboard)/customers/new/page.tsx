@@ -47,7 +47,7 @@ export default function NewCustomerPage() {
   return (
     <div className="space-y-6 max-w-2xl">
       <div className="flex items-center gap-4">
-        <Link href="/customers" className="text-gray-500 hover:text-gray-700">
+        <Link href="/customers" className="text-gray-500 hover:text-foreground">
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <h1 className="text-2xl font-bold text-gray-900">New Customer</h1>

@@ -4,14 +4,16 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { apiGet, apiPut, apiDelete, getApiError } from "@/lib/api-client";
-import type { Product, Category } from "@/lib/types";
+import type { Product, Category, AttributeSchema } from "@/lib/types";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
+import Textarea from "@/components/ui/Textarea";
 import Badge from "@/components/ui/Badge";
 import { Card, CardHeader, CardContent } from "@/components/ui/Card";
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft, Trash2, Plus, X } from "lucide-react";
 import { useAuthContext } from "@/providers/AuthProvider";
+import ImageUpload from "@/components/ImageUpload";
 
 export default function EditProductPage() {
   const { id } = useParams();
@@ -20,19 +22,26 @@ export default function EditProductPage() {
 
   const [product, setProduct] = useState<Product | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [categorySchema, setCategorySchema] = useState<AttributeSchema[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [tagInput, setTagInput] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const [prodData, catData] = await Promise.all([
           apiGet<Product>(`/products/${id}`),
-          apiGet<Category[]>("/categories?limit=100"),
+          apiGet<{ items: Category[] }>("/categories?limit=100"),
         ]);
         setProduct(prodData);
-        setCategories(catData);
+        setCategories(catData.items || []);
+        
+        const category = catData.items?.find((c: Category) => c._id === prodData.category_id);
+        if (category) {
+          setCategorySchema(category.attribute_schema || []);
+        }
       } catch (err: any) {
         setError(getApiError(err));
       } finally {
@@ -41,6 +50,13 @@ export default function EditProductPage() {
     };
     if (id) fetchData();
   }, [id]);
+
+  useEffect(() => {
+    if (product && categories.length > 0) {
+      const category = categories.find(c => c._id === product.category_id);
+      setCategorySchema(category?.attribute_schema || []);
+    }
+  }, [product?.category_id, categories]);
 
   const handleSave = async () => {
     if (!product) return;
@@ -58,6 +74,7 @@ export default function EditProductPage() {
           _id: v._id,
           sku: v.sku,
           price: v.price,
+          image: v.image,
           attributes: v.attributes,
         })),
       });
@@ -79,14 +96,59 @@ export default function EditProductPage() {
     }
   };
 
-  if (loading) return <div className="py-12 text-center">Loading...</div>;
-  if (!product) return <div className="py-12 text-center">Product not found</div>;
+  const updateVariant = (index: number, field: string, value: any) => {
+    if (!product) return;
+    const newVariants = [...product.variants];
+    if (field.startsWith("attributes.")) {
+      const attrKey = field.split(".")[1];
+      newVariants[index].attributes = { ...newVariants[index].attributes, [attrKey]: value };
+    } else {
+      (newVariants[index] as any)[field] = value;
+    }
+    setProduct({ ...product, variants: newVariants });
+  };
+
+  const addVariant = () => {
+    if (!product) return;
+    const initialAttrs: Record<string, any> = {};
+    categorySchema.forEach(attr => {
+      initialAttrs[attr.key] = attr.type === 'boolean' ? false : (attr.type === 'number' ? 0 : "");
+    });
+    setProduct({
+      ...product,
+      variants: [...product.variants, { _id: "", sku: "", price: 0, attributes: initialAttrs }]
+    });
+  };
+
+  const removeVariant = (index: number) => {
+    if (!product) return;
+    setProduct({
+      ...product,
+      variants: product.variants.filter((_, i) => i !== index)
+    });
+  };
+
+  const addTag = () => {
+    if (product && tagInput && !product.tags.includes(tagInput)) {
+      setProduct({ ...product, tags: [...product.tags, tagInput] });
+      setTagInput("");
+    }
+  };
+
+  const removeTag = (tag: string) => {
+    if (product) {
+      setProduct({ ...product, tags: product.tags.filter(t => t !== tag) });
+    }
+  };
+
+  if (loading) return <div className="py-12 text-center text-gray-500">Loading...</div>;
+  if (!product) return <div className="py-12 text-center text-gray-500">Product not found</div>;
 
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="space-y-6 max-w-4xl pb-20">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/products" className="text-gray-500 hover:text-gray-700">
+          <Link href="/products" className="text-gray-500 hover:text-foreground">
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <h1 className="text-2xl font-bold text-gray-900">Edit Product</h1>
@@ -106,64 +168,203 @@ export default function EditProductPage() {
         </div>
       )}
 
-      <Card>
-        <CardHeader><h2 className="text-lg font-semibold">Basic Info</h2></CardHeader>
-        <CardContent className="space-y-4">
-          <Input label="Name" value={product.name} onChange={(e) => setProduct({...product, name: e.target.value})} />
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-            <textarea
-              value={product.description || ""}
-              onChange={(e) => setProduct({...product, description: e.target.value})}
-              className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-              rows={3}
-            />
-          </div>
-          <Select
-            label="Category"
-            value={product.category_id}
-            onChange={(e) => setProduct({...product, category_id: e.target.value})}
-            options={[
-              { value: "", label: "Select..." },
-              ...categories.map((c) => ({ value: c._id, label: c.name })),
-            ]}
-          />
-          <Select
-            label="Status"
-            value={product.status}
-            onChange={(e) => setProduct({...product, status: e.target.value as any})}
-            options={[
-              { value: "draft", label: "Draft" },
-              { value: "active", label: "Active" },
-              { value: "archived", label: "Archived" },
-            ]}
-          />
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-2 space-y-6">
+          <Card>
+            <CardHeader><h2 className="text-lg font-semibold">Basic Info</h2></CardHeader>
+            <CardContent className="space-y-4">
+              <Input label="Name" value={product.name} onChange={(e) => setProduct({...product, name: e.target.value})} />
+              <Textarea
+                label="Description"
+                value={product.description || ""}
+                onChange={(e) => setProduct({...product, description: e.target.value})}
+                rows={5}
+              />
+            </CardContent>
+          </Card>
 
-      <Card>
-        <CardHeader><h2 className="text-lg font-semibold">Variants ({product.variants.length})</h2></CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {product.variants.map((v, i) => (
-              <div key={v._id} className="p-4 border border-gray-200 rounded-md">
-                <p className="font-medium text-sm">{v.sku} - ${v.price}</p>
-                <div className="mt-2 flex gap-2 flex-wrap">
-                  {Object.entries(v.attributes || {}).map(([key, val]) => (
-                    <Badge key={key}>{key}: {String(val)}</Badge>
-                  ))}
-                </div>
+          <Card>
+            <CardHeader><h2 className="text-lg font-semibold">Product Images</h2></CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-4">
+                {product.images.map((img, i) => (
+                  <div key={i} className="relative w-24 h-24 border rounded-md overflow-hidden group">
+                    <img src={img} alt={`Product ${i}`} className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => setProduct({...product, images: product.images.filter((_, idx) => idx !== i)})}
+                      className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+                <ImageUpload 
+                  onChange={(url) => setProduct({...product, images: [...product.images, url]})} 
+                  onRemove={() => {}} 
+                />
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
 
-      {hasPermission("products:write") && (
-        <div className="flex gap-3">
-          <Button onClick={handleSave} loading={saving}>Save Changes</Button>
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold">Variants</h2>
+                <Button type="button" variant="secondary" size="sm" onClick={addVariant}>
+                  <Plus className="h-4 w-4 mr-2" /> Add Variant
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {product.variants.map((v, i) => (
+                <div key={v._id || i} className="p-4 border border-gray-200 rounded-lg space-y-4 relative">
+                  {product.variants.length > 1 && (
+                    <button 
+                      type="button" 
+                      onClick={() => removeVariant(i)} 
+                      className="absolute top-2 right-2 text-gray-400 hover:text-red-600 transition-colors"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  )}
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="md:col-span-1">
+                      <ImageUpload
+                        label="Variant Image"
+                        value={v.image}
+                        onChange={(url) => updateVariant(i, "image", url)}
+                        onRemove={() => updateVariant(i, "image", undefined)}
+                      />
+                    </div>
+                    <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <Input
+                        label="SKU"
+                        value={v.sku}
+                        onChange={(e) => updateVariant(i, "sku", e.target.value)}
+                        required
+                      />
+                      <Input
+                        label="Price"
+                        value={v.price}
+                        onChange={(e) => updateVariant(i, "price", parseFloat(e.target.value) || 0)}
+                        type="number"
+                        step="0.01"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  {categorySchema.length > 0 && (
+                    <div className="pt-4 border-t border-gray-100">
+                      <h3 className="text-sm font-medium text-gray-700 mb-3">Attributes</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {categorySchema.map((attr) => (
+                          <div key={attr.key}>
+                            {attr.type === 'enum' ? (
+                              <Select
+                                label={attr.key}
+                                value={v.attributes[attr.key] || ""}
+                                onChange={(e) => updateVariant(i, `attributes.${attr.key}`, e.target.value)}
+                                options={[
+                                  { value: "", label: `Select ${attr.key}...` },
+                                  ...(attr.values || []).map(val => ({ value: val, label: val }))
+                                ]}
+                              />
+                            ) : attr.type === 'boolean' ? (
+                              <div className="flex items-center gap-2 mt-8">
+                                <input
+                                  type="checkbox"
+                                  id={`attr-${i}-${attr.key}`}
+                                  checked={!!v.attributes[attr.key]}
+                                  onChange={(e) => updateVariant(i, `attributes.${attr.key}`, e.target.checked)}
+                                  className="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4"
+                                />
+                                <label htmlFor={`attr-${i}-${attr.key}`} className="text-sm font-medium text-gray-700">
+                                  {attr.key}
+                                </label>
+                              </div>
+                            ) : (
+                              <Input
+                                label={attr.key}
+                                type={attr.type === 'number' ? 'number' : 'text'}
+                                value={v.attributes[attr.key] || ""}
+                                onChange={(e) => updateVariant(i, `attributes.${attr.key}`, attr.type === 'number' ? parseFloat(e.target.value) : e.target.value)}
+                              />
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </CardContent>
+          </Card>
         </div>
-      )}
+
+        <div className="space-y-6">
+          <Card>
+            <CardHeader><h2 className="text-lg font-semibold">Organization</h2></CardHeader>
+            <CardContent className="space-y-4">
+              <Select
+                label="Category"
+                value={product.category_id}
+                onChange={(e) => setProduct({...product, category_id: e.target.value})}
+                options={[
+                  { value: "", label: "Select..." },
+                  ...categories.map((c) => ({ value: c._id, label: c.name })),
+                ]}
+              />
+              <Select
+                label="Status"
+                value={product.status}
+                onChange={(e) => setProduct({...product, status: e.target.value as any})}
+                options={[
+                  { value: "draft", label: "Draft" },
+                  { value: "active", label: "Active" },
+                  { value: "archived", label: "Archived" },
+                ]}
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader><h2 className="text-lg font-semibold">Tags</h2></CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex gap-2">
+                <Input
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  placeholder="Add a tag..."
+                  onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+                />
+                <Button type="button" variant="secondary" onClick={addTag}>Add</Button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {product.tags.map((tag) => (
+                  <span key={tag} className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-700 rounded-md text-xs">
+                    {tag}
+                    <button type="button" onClick={() => removeTag(tag)} className="text-gray-400 hover:text-gray-600">
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      <div className="flex gap-3 justify-end border-t pt-6">
+        <Link href="/products">
+          <Button type="button" variant="secondary">Cancel</Button>
+        </Link>
+        {hasPermission("products:write") && (
+          <Button onClick={handleSave} loading={saving} className="px-8">Save Changes</Button>
+        )}
+      </div>
     </div>
   );
 }

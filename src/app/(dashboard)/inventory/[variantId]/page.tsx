@@ -6,7 +6,7 @@ import { apiGet, apiPatch, getApiError } from "@/lib/api-client";
 import type { InventoryItem, ManualAdjustmentRequest } from "@/lib/types";
 import Button from "@/components/ui/Button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { ArrowLeft } from "lucide-react";
 
 export default function InventoryDetailPage() {
@@ -75,7 +75,7 @@ export default function InventoryDetailPage() {
   return (
     <div className="space-y-6 max-w-4xl">
       <div className="flex items-center gap-4">
-        <button onClick={() => router.back()} className="text-gray-500 hover:text-gray-700">
+        <button onClick={() => router.back()} className="text-gray-500 hover:text-foreground">
           <ArrowLeft className="h-5 w-5" />
         </button>
         <h1 className="text-2xl font-bold text-gray-900">Inventory Detail</h1>
@@ -100,31 +100,31 @@ export default function InventoryDetailPage() {
           </CardHeader>
           <CardContent className="space-y-2">
             <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Product</span>
+              <span className="text-sm text-foreground">Product</span>
               <span className="font-medium">{item.product_name}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-gray-600">SKU</span>
+              <span className="text-sm text-foreground">SKU</span>
               <span className="font-medium">{item.sku}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Stock</span>
+              <span className="text-sm text-foreground">Stock</span>
               <span className="font-medium">{item.stock}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Reserved</span>
+              <span className="text-sm text-foreground">Reserved</span>
               <span className="font-medium">{item.reserved}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Available</span>
+              <span className="text-sm text-foreground">Available</span>
               <span className="font-medium">{available}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Low Stock Threshold</span>
+              <span className="text-sm text-foreground">Low Stock Threshold</span>
               <span className="font-medium">{item.low_stock_threshold}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Status</span>
+              <span className="text-sm text-foreground">Status</span>
               <span className={`font-medium ${isLow ? "text-red-600" : "text-green-600"}`}>
                 {isLow ? "Low Stock" : "In Stock"}
               </span>
@@ -139,7 +139,7 @@ export default function InventoryDetailPage() {
           <CardContent>
             <form onSubmit={handleAdjustment} className="space-y-4">
               <div>
-                <label htmlFor="delta" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="delta" className="block text-sm font-medium text-foreground mb-1">
                   Delta (use negative for reduction)
                 </label>
                 <input
@@ -154,7 +154,7 @@ export default function InventoryDetailPage() {
               </div>
 
               <div>
-                <label htmlFor="reason" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="reason" className="block text-sm font-medium text-foreground mb-1">
                   Reason
                 </label>
                 <input

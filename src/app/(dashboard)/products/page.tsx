@@ -34,9 +34,20 @@ export default function ProductsPage() {
       key: "name",
       title: "Product",
       render: (p: Product) => (
-        <div>
-          <p className="font-medium text-gray-900">{p.name}</p>
-          <p className="text-xs text-gray-500">{p.sku || p._id}</p>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-md border border-gray-200 overflow-hidden bg-gray-50 flex-shrink-0">
+            {p.images && p.images[0] ? (
+              <img src={p.images[0]} alt="" className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <span className="text-[10px] text-gray-400">No img</span>
+              </div>
+            )}
+          </div>
+          <div>
+            <p className="font-medium text-gray-900">{p.name}</p>
+            <p className="text-xs text-gray-500">{p.sku || p._id}</p>
+          </div>
         </div>
       ),
     },

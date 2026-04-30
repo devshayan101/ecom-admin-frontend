@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { apiGet } from "@/lib/api-client";
 import type { TopProduct } from "@/lib/types";
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { getApiError } from "@/lib/api-client";
 
 export default function TopProducts() {
@@ -14,8 +14,8 @@ export default function TopProducts() {
   useEffect(() => {
     const fetchTopProducts = async () => {
       try {
-        const data = await apiGet<TopProduct[]>("/dashboard/top-products");
-        setProducts(data);
+        const data = await apiGet<{ items: TopProduct[] }>("/dashboard/top-products");
+        setProducts(data.items || []);
       } catch (err: any) {
         setError(getApiError(err));
       } finally {

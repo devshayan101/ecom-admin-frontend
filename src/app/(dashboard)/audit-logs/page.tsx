@@ -7,7 +7,7 @@ import type { AuditLog } from "@/lib/types";
 import Table from "@/components/ui/Table";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { Search } from "lucide-react";
 
 export default function AuditLogsPage() {
@@ -31,7 +31,7 @@ export default function AuditLogsPage() {
       key: "created_at",
       title: "Date",
       render: (log: AuditLog) => (
-        <span className="text-sm text-gray-600">
+        <span className="text-sm text-foreground">
           {new Date(log.created_at).toLocaleString()}
         </span>
       ),
@@ -94,7 +94,7 @@ export default function AuditLogsPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div>
-          <label htmlFor="entity-type" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="entity-type" className="block text-sm font-medium text-foreground mb-1">
             Entity Type
           </label>
           <select
@@ -113,7 +113,7 @@ export default function AuditLogsPage() {
         </div>
 
         <div>
-          <label htmlFor="actor-type" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="actor-type" className="block text-sm font-medium text-foreground mb-1">
             Actor Type
           </label>
           <select
@@ -130,7 +130,7 @@ export default function AuditLogsPage() {
         </div>
 
         <div>
-          <label htmlFor="result" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="result" className="block text-sm font-medium text-foreground mb-1">
             Result
           </label>
           <select
@@ -147,7 +147,7 @@ export default function AuditLogsPage() {
         </div>
 
         <div>
-          <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="search" className="block text-sm font-medium text-foreground mb-1">
             Search
           </label>
           <input

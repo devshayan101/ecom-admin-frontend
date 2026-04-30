@@ -1,9 +1,9 @@
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string;
   error?: string;
 }
 
-export default function Input({ label, error, className = "", ...props }: InputProps) {
+export default function Textarea({ label, error, className = "", ...props }: TextareaProps) {
   return (
     <div>
       {label && (
@@ -11,7 +11,7 @@ export default function Input({ label, error, className = "", ...props }: InputP
           {label}
         </label>
       )}
-      <input
+      <textarea
         className={`block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-foreground placeholder-gray-400 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 ${error ? "border-red-500" : ""} ${className}`}
         {...props}
       />

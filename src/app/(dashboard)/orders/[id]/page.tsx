@@ -59,7 +59,7 @@ export default function OrderDetailPage() {
   return (
     <div className="space-y-6 max-w-4xl">
       <div className="flex items-center gap-4">
-        <button onClick={() => router.back()} className="text-gray-500 hover:text-gray-700">
+        <button onClick={() => router.back()} className="text-gray-500 hover:text-foreground">
           <ArrowLeft className="h-5 w-5" />
         </button>
         <h1 className="text-2xl font-bold text-gray-900">Order Details</h1>
@@ -78,23 +78,23 @@ export default function OrderDetailPage() {
           </CardHeader>
           <CardContent className="space-y-2">
             <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Status</span>
+              <span className="text-sm text-foreground">Status</span>
               <Badge variant={order.status === "DELIVERED" ? "success" : order.status === "CANCELLED" ? "destructive" : "outline"}>
                 {ORDER_STATUS_LABELS[order.status] || order.status}
               </Badge>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Payment</span>
+              <span className="text-sm text-foreground">Payment</span>
               <Badge variant={order.payment_status === "PAID" ? "success" : "warning"}>
                 {order.payment_status}
               </Badge>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Total</span>
+              <span className="text-sm text-foreground">Total</span>
               <span className="font-medium">${order.total_amount?.toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Date</span>
+              <span className="text-sm text-foreground">Date</span>
               <span className="text-sm">{new Date(order.created_at).toLocaleDateString()}</span>
             </div>
           </CardContent>
@@ -107,7 +107,7 @@ export default function OrderDetailPage() {
           <CardContent className="space-y-4">
             {allowedTransitions.length > 0 && hasPermission("orders:write") ? (
               <div>
-                <p className="text-sm text-gray-600 mb-2">Allowed transitions:</p>
+                <p className="text-sm text-foreground mb-2">Allowed transitions:</p>
                 <div className="flex gap-2 flex-wrap">
                   {allowedTransitions.map((status) => (
                     <Button
@@ -138,7 +138,7 @@ export default function OrderDetailPage() {
               <div key={idx} className="flex justify-between items-center py-2 border-b">
                 <div>
                   <p className="font-medium">{item.sku}</p>
-                  <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
+                  <p className="text-sm text-foreground">Qty: {item.quantity}</p>
                 </div>
                 <p className="font-medium">${item.price_at_purchase?.toFixed(2)}</p>
               </div>

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { apiGet } from "@/lib/api-client";
 import type { InventoryReport } from "@/lib/types";
 import { getApiError } from "@/lib/api-client";
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 
@@ -118,7 +118,7 @@ export default function InventoryReportPage() {
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
                               {item.stock}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 text-right">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground text-right">
                               {item.reserved}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">
