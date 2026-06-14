@@ -99,7 +99,7 @@ export default function EditProductPage() {
         images: product.images,
         status: product.status,
         variants: product.variants.map((v) => ({
-          _id: v._id,
+          ...(v._id ? { _id: v._id } : {}),
           sku: v.sku,
           price: v.price,
           image: v.image,
