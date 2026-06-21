@@ -23,8 +23,8 @@ export default function NewProductPage() {
   const [status, setStatus] = useState<"active" | "draft">("draft");
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
-  const [variants, setVariants] = useState<{ sku: string; price: string; image?: string; attributes: Record<string, any> }[]>([
-    { sku: "", price: "", attributes: {} },
+  const [variants, setVariants] = useState<{ sku: string; price: string; image?: string; stock: string; low_stock_threshold: string; attributes: Record<string, any> }[]>([
+    { sku: "", price: "", stock: "0", low_stock_threshold: "10", attributes: {} },
   ]);
   const [images, setImages] = useState<string[]>([]);
   const [error, setError] = useState("");
@@ -62,7 +62,7 @@ export default function NewProductPage() {
     categorySchema.forEach(attr => {
       initialAttrs[attr.key] = attr.type === 'boolean' ? false : (attr.type === 'number' ? 0 : "");
     });
-    setVariants([...variants, { sku: "", price: "", attributes: initialAttrs }]);
+    setVariants([...variants, { sku: "", price: "", stock: "0", low_stock_threshold: "10", attributes: initialAttrs }]);
   };
 
   const removeVariant = (index: number) => {
@@ -108,6 +108,8 @@ export default function NewProductPage() {
           sku: v.sku,
           price: parseFloat(v.price) || 0,
           image: v.image,
+          stock: parseInt(v.stock) || 0,
+          low_stock_threshold: parseInt(v.low_stock_threshold) || 10,
           attributes: v.attributes,
         })),
       };
@@ -222,6 +224,22 @@ export default function NewProductPage() {
                           type="number"
                           step="0.01"
                           placeholder="0.00"
+                          required
+                        />
+                        <Input
+                          label="Initial Stock"
+                          value={v.stock}
+                          onChange={(e) => updateVariant(i, "stock", e.target.value)}
+                          type="number"
+                          placeholder="0"
+                          required
+                        />
+                        <Input
+                          label="Low Stock Threshold"
+                          value={v.low_stock_threshold}
+                          onChange={(e) => updateVariant(i, "low_stock_threshold", e.target.value)}
+                          type="number"
+                          placeholder="10"
                           required
                         />
                       </div>

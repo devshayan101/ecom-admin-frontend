@@ -38,6 +38,8 @@ export default function ProductsPage() {
           <div className="w-10 h-10 rounded-md border border-border overflow-hidden bg-muted/50 flex-shrink-0">
             {p.images && p.images[0] ? (
               <img src={p.images[0]} alt="" className="w-full h-full object-cover" />
+            ) : p.variants?.[0]?.image ? (
+              <img src={p.variants[0].image} alt="" className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
                 <span className="text-[10px] text-gray-400">No img</span>

@@ -26,6 +26,8 @@ export interface ProductVariant {
   sku: string;
   price: number;
   image?: string;
+  stock?: number;
+  low_stock_threshold?: number;
   attributes: Record<string, any>;
 }
 

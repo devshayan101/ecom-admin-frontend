@@ -75,6 +75,8 @@ export default function EditProductPage() {
           sku: v.sku,
           price: v.price,
           image: v.image,
+          stock: v.stock !== undefined ? Number(v.stock) : undefined,
+          low_stock_threshold: v.low_stock_threshold !== undefined ? Number(v.low_stock_threshold) : undefined,
           attributes: v.attributes,
         })),
       });
@@ -116,7 +118,7 @@ export default function EditProductPage() {
     });
     setProduct({
       ...product,
-      variants: [...product.variants, { _id: "", sku: "", price: 0, attributes: initialAttrs }]
+      variants: [...product.variants, { _id: "", sku: "", price: 0, stock: 0, low_stock_threshold: 10, attributes: initialAttrs }]
     });
   };
 
@@ -253,6 +255,28 @@ export default function EditProductPage() {
                         step="0.01"
                         required
                       />
+                      {!v._id ? (
+                        <>
+                          <Input
+                            label="Initial Stock"
+                            value={v.stock !== undefined ? String(v.stock) : "0"}
+                            onChange={(e) => updateVariant(i, "stock", e.target.value)}
+                            type="number"
+                            required
+                          />
+                          <Input
+                            label="Low Stock Threshold"
+                            value={v.low_stock_threshold !== undefined ? String(v.low_stock_threshold) : "10"}
+                            onChange={(e) => updateVariant(i, "low_stock_threshold", e.target.value)}
+                            type="number"
+                            required
+                          />
+                        </>
+                      ) : (
+                        <div className="md:col-span-2 text-xs text-muted-foreground bg-muted p-2 rounded-md">
+                          Stock is managed through the <Link href="/inventory" className="text-primary hover:underline font-medium">Inventory page</Link>
+                        </div>
+                      )}
                     </div>
                   </div>
 
