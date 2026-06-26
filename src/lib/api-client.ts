@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import { ApiError, PaginatedResponse } from "./types";
+import { setToken, removeToken } from "./auth";
 
 const api: AxiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000",
@@ -36,14 +37,12 @@ api.interceptors.response.use(
           { withCredentials: true }
         );
         const newToken = data.accessToken;
-        if (typeof window !== "undefined") {
-          localStorage.setItem("access_token", newToken);
-        }
+        setToken(newToken);
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
         return api(originalRequest);
       } catch (refreshError) {
+        removeToken();
         if (typeof window !== "undefined") {
-          localStorage.removeItem("access_token");
           window.location.href = "/login";
         }
         return Promise.reject(refreshError);
