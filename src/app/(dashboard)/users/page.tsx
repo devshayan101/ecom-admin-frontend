@@ -47,7 +47,7 @@ export default function UsersPage() {
       key: "role",
       title: "Role",
       render: (u: AdminUser) => (
-        <Badge variant="secondary" className="capitalize">
+        <Badge variant="default" className="capitalize">
           {u.role}
         </Badge>
       ),
