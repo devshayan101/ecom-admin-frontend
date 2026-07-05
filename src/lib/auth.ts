@@ -1,3 +1,4 @@
+import Cookies from "js-cookie";
 import { AuthPayload } from "./types";
 
 const TOKEN_KEY = "access_token";
@@ -5,12 +6,17 @@ const TOKEN_KEY = "access_token";
 export function setToken(token: string): void {
   if (typeof window !== "undefined") {
     localStorage.setItem(TOKEN_KEY, token);
+    Cookies.set(TOKEN_KEY, token, {
+      expires: 7, // matches refresh token / session duration
+      secure: window.location.protocol === "https:",
+      sameSite: "strict"
+    });
   }
 }
 
 export function getToken(): string | null {
   if (typeof window !== "undefined") {
-    return localStorage.getItem(TOKEN_KEY);
+    return localStorage.getItem(TOKEN_KEY) || Cookies.get(TOKEN_KEY) || null;
   }
   return null;
 }
@@ -18,6 +24,7 @@ export function getToken(): string | null {
 export function removeToken(): void {
   if (typeof window !== "undefined") {
     localStorage.removeItem(TOKEN_KEY);
+    Cookies.remove(TOKEN_KEY);
   }
 }
 
