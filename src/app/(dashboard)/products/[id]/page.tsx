@@ -27,6 +27,7 @@ export default function EditProductPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [tagInput, setTagInput] = useState("");
+  const [availableRegions, setAvailableRegions] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -41,15 +42,11 @@ export default function EditProductPage() {
         const regions = Array.from(new Set(rules.map((r: any) => {
           return r.state ? `${r.country} - ${r.state}` : r.country;
         })));
-
-        const mergedSlabs = regions.map(reg => {
-          const saved = prodData.tax_slabs?.find((s: any) => s.region === reg);
-          return { region: reg, rate: saved ? saved.rate : 0 };
-        });
+        setAvailableRegions(regions);
 
         setProduct({
           ...prodData,
-          tax_slabs: mergedSlabs
+          tax_slabs: prodData.tax_slabs || []
         });
         setCategories(catData.items || []);
         
@@ -371,49 +368,92 @@ export default function EditProductPage() {
           </Card>
 
           <Card>
-            <CardHeader><h2 className="text-lg font-semibold">Tax Category Slabs</h2></CardHeader>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold">Tax Category Slabs</h2>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setProduct({
+                    ...product,
+                    tax_slabs: [...(product.tax_slabs || []), { region: "", rate: 0 }]
+                  })}
+                >
+                  <Plus className="h-4 w-4 mr-2" /> Add Slab
+                </Button>
+              </div>
+            </CardHeader>
             <CardContent className="space-y-4">
               {!product.tax_slabs || product.tax_slabs.length === 0 ? (
-                <p className="text-xs text-muted-foreground">No tax regions configured in Settings.</p>
+                <p className="text-xs text-muted-foreground">No tax slabs configured for this product. Click "Add Slab" to configure one.</p>
               ) : (
                 product.tax_slabs.map((slab, idx) => (
-                  <div key={slab.region} className="space-y-1">
-                    <label className="text-xs font-semibold text-muted-foreground uppercase">{slab.region}</label>
-                    <div className="flex gap-2">
+                  <div key={idx} className="flex items-center gap-4 border border-border p-3 rounded-lg relative">
+                    <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
                       <Select
-                        value={[0, 5, 12, 18, 28].includes(slab.rate) ? String(slab.rate) : "custom"}
-                        onChange={(e) => {
-                          if (e.target.value !== "custom") {
-                            const newSlabs = [...(product.tax_slabs || [])];
-                            newSlabs[idx].rate = parseFloat(e.target.value) || 0;
-                            setProduct({ ...product, tax_slabs: newSlabs });
-                          }
-                        }}
-                        options={[
-                          { value: "0", label: "0% (Zero)" },
-                          { value: "5", label: "5% (Reduced)" },
-                          { value: "12", label: "12%" },
-                          { value: "18", label: "18% (Standard)" },
-                          { value: "28", label: "28%" },
-                          { value: "custom", label: "Custom..." }
-                        ]}
-                        className="flex-1"
-                      />
-                      <Input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        max="100"
-                        value={slab.rate}
+                        label="Region / Country"
+                        value={slab.region}
                         onChange={(e) => {
                           const newSlabs = [...(product.tax_slabs || [])];
-                          newSlabs[idx].rate = parseFloat(e.target.value) || 0;
+                          newSlabs[idx].region = e.target.value;
                           setProduct({ ...product, tax_slabs: newSlabs });
                         }}
-                        placeholder="Rate %"
-                        className="w-24"
+                        options={[
+                          { value: "", label: "Select region..." },
+                          ...availableRegions.map(reg => ({ value: reg, label: reg }))
+                        ]}
+                        required
                       />
+                      <div className="space-y-1">
+                        <label className="block text-sm font-medium text-foreground mb-1">Tax Rate (%)</label>
+                        <div className="flex gap-2">
+                          <Select
+                            value={[0, 5, 12, 18, 28].includes(slab.rate) ? String(slab.rate) : "custom"}
+                            onChange={(e) => {
+                              if (e.target.value !== "custom") {
+                                const newSlabs = [...(product.tax_slabs || [])];
+                                newSlabs[idx].rate = parseFloat(e.target.value) || 0;
+                                setProduct({ ...product, tax_slabs: newSlabs });
+                              }
+                            }}
+                            options={[
+                              { value: "0", label: "0% (Zero)" },
+                              { value: "5", label: "5% (Reduced)" },
+                              { value: "12", label: "12%" },
+                              { value: "18", label: "18% (Standard)" },
+                              { value: "28", label: "28%" },
+                              { value: "custom", label: "Custom..." }
+                            ]}
+                            className="flex-1"
+                          />
+                          <Input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            max="100"
+                            value={slab.rate}
+                            onChange={(e) => {
+                              const newSlabs = [...(product.tax_slabs || [])];
+                              newSlabs[idx].rate = parseFloat(e.target.value) || 0;
+                              setProduct({ ...product, tax_slabs: newSlabs });
+                            }}
+                            placeholder="Rate %"
+                            className="w-24"
+                          />
+                        </div>
+                      </div>
                     </div>
+                    <button
+                      type="button"
+                      className="text-gray-400 hover:text-red-600 transition-colors mt-6 p-1 cursor-pointer"
+                      onClick={() => setProduct({
+                        ...product,
+                        tax_slabs: (product.tax_slabs || []).filter((_, i) => i !== idx)
+                      })}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
                   </div>
                 ))
               )}
