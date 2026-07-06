@@ -355,7 +355,7 @@ export default function NewProductPage() {
                   productTaxSlabs.map((slab, idx) => (
                     <div key={idx} className="flex items-center gap-4 border border-border p-3 rounded-lg relative">
                       <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Select
+                        <Input
                           label="Region / Country"
                           value={slab.region}
                           onChange={(e) => {
@@ -363,10 +363,7 @@ export default function NewProductPage() {
                             newSlabs[idx].region = e.target.value;
                             setProductTaxSlabs(newSlabs);
                           }}
-                          options={[
-                            { value: "", label: "Select region..." },
-                            ...availableRegions.map(reg => ({ value: reg, label: reg }))
-                          ]}
+                          placeholder="e.g. US, India, GB"
                           required
                         />
                         <div className="space-y-1">
