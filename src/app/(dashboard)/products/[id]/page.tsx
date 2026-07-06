@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { apiGet, apiPut, apiDelete, getApiError } from "@/lib/api-client";
-import type { Product, Category, AttributeSchema } from "@/lib/types";
+import type { Product, Category, AttributeSchema, Settings, TaxSlab } from "@/lib/types";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
@@ -31,11 +31,26 @@ export default function EditProductPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [prodData, catData] = await Promise.all([
+        const [prodData, catData, settingsData] = await Promise.all([
           apiGet<Product>(`/products/${id}`),
           apiGet<{ items: Category[] }>("/categories?limit=100"),
+          apiGet<Settings>("/settings"),
         ]);
-        setProduct(prodData);
+
+        const rules = settingsData.taxes?.taxRules || [];
+        const regions = Array.from(new Set(rules.map((r: any) => {
+          return r.state ? `${r.country} - ${r.state}` : r.country;
+        })));
+
+        const mergedSlabs = regions.map(reg => {
+          const saved = prodData.tax_slabs?.find((s: any) => s.region === reg);
+          return { region: reg, rate: saved ? saved.rate : 0 };
+        });
+
+        setProduct({
+          ...prodData,
+          tax_slabs: mergedSlabs
+        });
         setCategories(catData.items || []);
         
         const category = catData.items?.find((c: Category) => c._id === prodData.category_id);
@@ -79,6 +94,7 @@ export default function EditProductPage() {
           low_stock_threshold: v.low_stock_threshold !== undefined ? Number(v.low_stock_threshold) : undefined,
           attributes: v.attributes,
         })),
+        tax_slabs: product.tax_slabs,
       });
       router.push("/products");
     } catch (err: any) {
@@ -351,6 +367,56 @@ export default function EditProductPage() {
                   { value: "archived", label: "Archived" },
                 ]}
               />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader><h2 className="text-lg font-semibold">Tax Category Slabs</h2></CardHeader>
+            <CardContent className="space-y-4">
+              {!product.tax_slabs || product.tax_slabs.length === 0 ? (
+                <p className="text-xs text-muted-foreground">No tax regions configured in Settings.</p>
+              ) : (
+                product.tax_slabs.map((slab, idx) => (
+                  <div key={slab.region} className="space-y-1">
+                    <label className="text-xs font-semibold text-muted-foreground uppercase">{slab.region}</label>
+                    <div className="flex gap-2">
+                      <Select
+                        value={[0, 5, 12, 18, 28].includes(slab.rate) ? String(slab.rate) : "custom"}
+                        onChange={(e) => {
+                          if (e.target.value !== "custom") {
+                            const newSlabs = [...(product.tax_slabs || [])];
+                            newSlabs[idx].rate = parseFloat(e.target.value) || 0;
+                            setProduct({ ...product, tax_slabs: newSlabs });
+                          }
+                        }}
+                        options={[
+                          { value: "0", label: "0% (Zero)" },
+                          { value: "5", label: "5% (Reduced)" },
+                          { value: "12", label: "12%" },
+                          { value: "18", label: "18% (Standard)" },
+                          { value: "28", label: "28%" },
+                          { value: "custom", label: "Custom..." }
+                        ]}
+                        className="flex-1"
+                      />
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        max="100"
+                        value={slab.rate}
+                        onChange={(e) => {
+                          const newSlabs = [...(product.tax_slabs || [])];
+                          newSlabs[idx].rate = parseFloat(e.target.value) || 0;
+                          setProduct({ ...product, tax_slabs: newSlabs });
+                        }}
+                        placeholder="Rate %"
+                        className="w-24"
+                      />
+                    </div>
+                  </div>
+                ))
+              )}
             </CardContent>
           </Card>
 

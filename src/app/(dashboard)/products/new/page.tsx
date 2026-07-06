@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiPost, apiGet, getApiError } from "@/lib/api-client";
-import type { Category, CreateProductRequest, AttributeSchema } from "@/lib/types";
+import type { Category, CreateProductRequest, AttributeSchema, Settings, TaxSlab } from "@/lib/types";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
@@ -29,10 +29,21 @@ export default function NewProductPage() {
   const [images, setImages] = useState<string[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [productTaxSlabs, setProductTaxSlabs] = useState<TaxSlab[]>([]);
 
   useEffect(() => {
     apiGet<{ items: Category[] }>("/categories?limit=100")
       .then((data) => setCategories(data.items || []))
+      .catch(console.error);
+
+    apiGet<Settings>("/settings")
+      .then((settings) => {
+        const rules = settings.taxes?.taxRules || [];
+        const regions = Array.from(new Set(rules.map((r: any) => {
+          return r.state ? `${r.country} - ${r.state}` : r.country;
+        })));
+        setProductTaxSlabs(regions.map(reg => ({ region: reg, rate: 0 })));
+      })
       .catch(console.error);
   }, []);
 
@@ -112,6 +123,7 @@ export default function NewProductPage() {
           low_stock_threshold: parseInt(v.low_stock_threshold) || 10,
           attributes: v.attributes,
         })),
+        tax_slabs: productTaxSlabs,
       };
       await apiPost("/products", payload);
       router.push("/products");
@@ -318,6 +330,56 @@ export default function NewProductPage() {
                     { value: "active", label: "Active" },
                   ]}
                 />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader><h2 className="text-lg font-semibold">Tax Category Slabs</h2></CardHeader>
+              <CardContent className="space-y-4">
+                {productTaxSlabs.length === 0 ? (
+                  <p className="text-xs text-muted-foreground">No tax regions configured in Settings.</p>
+                ) : (
+                  productTaxSlabs.map((slab, idx) => (
+                    <div key={slab.region} className="space-y-1">
+                      <label className="text-xs font-semibold text-muted-foreground uppercase">{slab.region}</label>
+                      <div className="flex gap-2">
+                        <Select
+                          value={[0, 5, 12, 18, 28].includes(slab.rate) ? String(slab.rate) : "custom"}
+                          onChange={(e) => {
+                            if (e.target.value !== "custom") {
+                              const newSlabs = [...productTaxSlabs];
+                              newSlabs[idx].rate = parseFloat(e.target.value) || 0;
+                              setProductTaxSlabs(newSlabs);
+                            }
+                          }}
+                          options={[
+                            { value: "0", label: "0% (Zero)" },
+                            { value: "5", label: "5% (Reduced)" },
+                            { value: "12", label: "12%" },
+                            { value: "18", label: "18% (Standard)" },
+                            { value: "28", label: "28%" },
+                            { value: "custom", label: "Custom..." }
+                          ]}
+                          className="flex-1"
+                        />
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          max="100"
+                          value={slab.rate}
+                          onChange={(e) => {
+                            const newSlabs = [...productTaxSlabs];
+                            newSlabs[idx].rate = parseFloat(e.target.value) || 0;
+                            setProductTaxSlabs(newSlabs);
+                          }}
+                          placeholder="Rate %"
+                          className="w-24"
+                        />
+                      </div>
+                    </div>
+                  ))
+                )}
               </CardContent>
             </Card>
 

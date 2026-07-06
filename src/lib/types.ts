@@ -31,6 +31,11 @@ export interface ProductVariant {
   attributes: Record<string, any>;
 }
 
+export interface TaxSlab {
+  region: string;
+  rate: number;
+}
+
 export interface Product {
   _id: string;
   name: string;
@@ -40,6 +45,7 @@ export interface Product {
   images: string[];
   status: 'active' | 'draft' | 'archived';
   variants: ProductVariant[];
+  tax_slabs?: TaxSlab[];
   created_at: string;
   updated_at: string;
   category_name?: string;
@@ -53,6 +59,7 @@ export interface CreateProductRequest {
   images: string[];
   status: 'active' | 'draft' | 'archived';
   variants: Omit<ProductVariant, '_id'>[];
+  tax_slabs?: TaxSlab[];
 }
 
 // =========================================
