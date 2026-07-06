@@ -278,3 +278,48 @@ export interface UploadUrlResponse {
   uploadUrl: string;
   objectUrl: string;
 }
+
+// =========================================
+// Settings Types
+// =========================================
+
+export interface TaxRule {
+  _id?: string;
+  country: string;
+  state: string;
+  rate: number;
+  name: string;
+  active: boolean;
+}
+
+export interface GstVatSettings {
+  enabled: boolean;
+  gstin?: string;
+  vatNumber?: string;
+  inclusive: boolean;
+}
+
+export interface GeneralSettings {
+  storeName: string;
+  storeEmail: string;
+  storePhone: string;
+  logoUrl?: string;
+  faviconUrl?: string;
+  currency: string;
+  timeZone: string;
+  language: string;
+}
+
+export interface TaxSettings {
+  taxRules: TaxRule[];
+  gstVatSettings: GstVatSettings;
+}
+
+export interface Settings {
+  _id: string;
+  general: GeneralSettings;
+  taxes: TaxSettings;
+  created_at: string;
+  updated_at: string;
+}
+
