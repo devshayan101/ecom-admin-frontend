@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { apiGet, apiPut, apiDelete, getApiError } from "@/lib/api-client";
-import type { Product, Category, AttributeSchema, Settings, TaxSlab } from "@/lib/types";
+import type { Product, Category, AttributeSchema, Settings, TaxSlab, TaxRule } from "@/lib/types";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
@@ -36,6 +36,7 @@ export default function EditProductPage() {
   const [error, setError] = useState("");
   const [tagInput, setTagInput] = useState("");
   const [availableRegions, setAvailableRegions] = useState<string[]>([]);
+  const [taxRules, setTaxRules] = useState<TaxRule[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -47,16 +48,20 @@ export default function EditProductPage() {
         ]);
 
         const rules = settingsData.taxes?.taxRules || [];
+        const activeRules = rules.filter((r: any) => r.active);
+        setTaxRules(activeRules);
+
         const regions = Array.from(new Set(rules.map((r: any) => {
           return r.state ? `${r.country} - ${r.state}` : r.country;
         })));
         setAvailableRegions(regions);
 
+        const activeRuleRates = activeRules.map((r: any) => r.rate);
         setProduct({
           ...prodData,
           tax_slabs: (prodData.tax_slabs || []).map(slab => ({
             ...slab,
-            isCustom: ![0, 5, 12, 18, 28].includes(slab.rate)
+            isCustom: !activeRuleRates.includes(slab.rate)
           }))
         });
         setCategories(catData.items || []);
@@ -438,11 +443,10 @@ export default function EditProductPage() {
                             setProduct({ ...product, tax_slabs: newSlabs });
                           }}
                           options={[
-                            { value: "0", label: "0% (Zero)" },
-                            { value: "5", label: "5% (Reduced)" },
-                            { value: "12", label: "12%" },
-                            { value: "18", label: "18% (Standard)" },
-                            { value: "28", label: "28%" },
+                            ...taxRules.map(rule => ({
+                              value: String(rule.rate),
+                              label: `${rule.name} (${rule.rate}%)`
+                            })),
                             { value: "custom", label: "Custom..." }
                           ]}
                         />

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiPost, apiGet, getApiError } from "@/lib/api-client";
-import type { Category, CreateProductRequest, AttributeSchema, Settings, TaxSlab } from "@/lib/types";
+import type { Category, CreateProductRequest, AttributeSchema, Settings, TaxSlab, TaxRule } from "@/lib/types";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
@@ -36,6 +36,7 @@ export default function NewProductPage() {
 
   const [productTaxSlabs, setProductTaxSlabs] = useState<LocalTaxSlab[]>([]);
   const [availableRegions, setAvailableRegions] = useState<string[]>([]);
+  const [taxRules, setTaxRules] = useState<TaxRule[]>([]);
 
   useEffect(() => {
     apiGet<{ items: Category[] }>("/categories?limit=100")
@@ -45,6 +46,7 @@ export default function NewProductPage() {
     apiGet<Settings>("/settings")
       .then((settings) => {
         const rules = settings.taxes?.taxRules || [];
+        setTaxRules(rules.filter((r: any) => r.active));
         const regions = Array.from(new Set(rules.map((r: any) => {
           return r.state ? `${r.country} - ${r.state}` : r.country;
         })));
@@ -392,11 +394,10 @@ export default function NewProductPage() {
                               setProductTaxSlabs(newSlabs);
                             }}
                             options={[
-                              { value: "0", label: "0% (Zero)" },
-                              { value: "5", label: "5% (Reduced)" },
-                              { value: "12", label: "12%" },
-                              { value: "18", label: "18% (Standard)" },
-                              { value: "28", label: "28%" },
+                              ...taxRules.map(rule => ({
+                                value: String(rule.rate),
+                                label: `${rule.name} (${rule.rate}%)`
+                              })),
                               { value: "custom", label: "Custom..." }
                             ]}
                           />
