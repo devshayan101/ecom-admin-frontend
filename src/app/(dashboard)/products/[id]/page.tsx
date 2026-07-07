@@ -15,12 +15,20 @@ import { ArrowLeft, Trash2, Plus, X } from "lucide-react";
 import { useAuthContext } from "@/providers/AuthProvider";
 import ImageUpload from "@/components/ImageUpload";
 
+interface LocalTaxSlab extends TaxSlab {
+  isCustom?: boolean;
+}
+
+interface LocalProduct extends Omit<Product, "tax_slabs"> {
+  tax_slabs?: LocalTaxSlab[];
+}
+
 export default function EditProductPage() {
   const { id } = useParams();
   const router = useRouter();
   const { hasPermission } = useAuthContext();
 
-  const [product, setProduct] = useState<Product | null>(null);
+  const [product, setProduct] = useState<LocalProduct | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [categorySchema, setCategorySchema] = useState<AttributeSchema[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,7 +54,10 @@ export default function EditProductPage() {
 
         setProduct({
           ...prodData,
-          tax_slabs: prodData.tax_slabs || []
+          tax_slabs: (prodData.tax_slabs || []).map(slab => ({
+            ...slab,
+            isCustom: ![0, 5, 12, 18, 28].includes(slab.rate)
+          }))
         });
         setCategories(catData.items || []);
         
@@ -91,7 +102,7 @@ export default function EditProductPage() {
           low_stock_threshold: v.low_stock_threshold !== undefined ? Number(v.low_stock_threshold) : undefined,
           attributes: v.attributes,
         })),
-        tax_slabs: product.tax_slabs,
+        tax_slabs: product.tax_slabs?.map(({ region, rate }) => ({ region, rate })),
       });
       router.push("/products");
     } catch (err: any) {
@@ -375,10 +386,14 @@ export default function EditProductPage() {
                   type="button"
                   variant="secondary"
                   size="sm"
-                  onClick={() => setProduct({
-                    ...product,
-                    tax_slabs: [...(product.tax_slabs || []), { region: "", rate: 0 }]
-                  })}
+                  onClick={() => {
+                    if (product) {
+                      setProduct({
+                        ...product,
+                        tax_slabs: [...(product.tax_slabs || []), { region: "", rate: 0, isCustom: false }]
+                      });
+                    }
+                  }}
                 >
                   <Plus className="h-4 w-4 mr-2" /> Add Slab
                 </Button>
@@ -389,8 +404,8 @@ export default function EditProductPage() {
                 <p className="text-xs text-muted-foreground">No tax slabs configured for this product. Click "Add Slab" to configure one.</p>
               ) : (
                 product.tax_slabs.map((slab, idx) => (
-                  <div key={idx} className="grid grid-cols-12 gap-3 items-end border border-border/60 bg-muted/20 p-4 rounded-xl shadow-sm relative">
-                    <div className="col-span-12 md:col-span-5">
+                  <div key={idx} className="flex flex-col gap-3 border border-border/60 bg-muted/20 p-4 rounded-xl shadow-sm relative">
+                    <div className="w-full">
                       <Select
                         label="Region / Country"
                         value={slab.region}
@@ -407,56 +422,63 @@ export default function EditProductPage() {
                       />
                     </div>
                     
-                    <div className="col-span-6 md:col-span-3">
-                      <label className="block text-sm font-medium text-foreground mb-1">Preset Slab</label>
-                      <Select
-                        value={[0, 5, 12, 18, 28].includes(slab.rate) ? String(slab.rate) : "custom"}
-                        onChange={(e) => {
-                          if (e.target.value !== "custom") {
+                    <div className="flex gap-3 items-end w-full">
+                      <div className="flex-1">
+                        <label className="block text-sm font-medium text-foreground mb-1">Preset Slab</label>
+                        <Select
+                          value={slab.isCustom ? "custom" : String(slab.rate)}
+                          onChange={(e) => {
                             const newSlabs = [...(product.tax_slabs || [])];
-                            newSlabs[idx].rate = parseFloat(e.target.value) || 0;
+                            if (e.target.value === "custom") {
+                              newSlabs[idx].isCustom = true;
+                            } else {
+                              newSlabs[idx].isCustom = false;
+                              newSlabs[idx].rate = parseFloat(e.target.value) || 0;
+                            }
                             setProduct({ ...product, tax_slabs: newSlabs });
-                          }
-                        }}
-                        options={[
-                          { value: "0", label: "0% (Zero)" },
-                          { value: "5", label: "5% (Reduced)" },
-                          { value: "12", label: "12%" },
-                          { value: "18", label: "18% (Standard)" },
-                          { value: "28", label: "28%" },
-                          { value: "custom", label: "Custom..." }
-                        ]}
-                      />
-                    </div>
+                          }}
+                          options={[
+                            { value: "0", label: "0% (Zero)" },
+                            { value: "5", label: "5% (Reduced)" },
+                            { value: "12", label: "12%" },
+                            { value: "18", label: "18% (Standard)" },
+                            { value: "28", label: "28%" },
+                            { value: "custom", label: "Custom..." }
+                          ]}
+                        />
+                      </div>
 
-                    <div className="col-span-6 md:col-span-3">
-                      <Input
-                        label="Rate (%)"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        max="100"
-                        value={slab.rate}
-                        onChange={(e) => {
-                          const newSlabs = [...(product.tax_slabs || [])];
-                          newSlabs[idx].rate = parseFloat(e.target.value) || 0;
-                          setProduct({ ...product, tax_slabs: newSlabs });
-                        }}
-                        placeholder="0.00"
-                      />
-                    </div>
+                      {slab.isCustom && (
+                        <div className="flex-1">
+                          <Input
+                            label="Rate (%)"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            max="100"
+                            value={slab.rate}
+                            onChange={(e) => {
+                              const newSlabs = [...(product.tax_slabs || [])];
+                              newSlabs[idx].rate = parseFloat(e.target.value) || 0;
+                              setProduct({ ...product, tax_slabs: newSlabs });
+                            }}
+                            placeholder="0.00"
+                          />
+                        </div>
+                      )}
 
-                    <div className="col-span-12 md:col-span-1 flex justify-center md:justify-end pb-1">
-                      <button
-                        type="button"
-                        className="flex items-center justify-center p-2.5 rounded-lg border border-red-200 text-red-500 bg-red-50 hover:bg-red-100 hover:text-red-600 transition-colors cursor-pointer w-full md:w-auto h-9"
-                        onClick={() => setProduct({
-                          ...product,
-                          tax_slabs: (product.tax_slabs || []).filter((_, i) => i !== idx)
-                        })}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                      <div className="flex-none">
+                        <button
+                          type="button"
+                          className="flex items-center justify-center p-2.5 rounded-lg border border-red-200 text-red-500 bg-red-50 hover:bg-red-100 hover:text-red-600 transition-colors cursor-pointer h-9 w-9"
+                          onClick={() => setProduct({
+                            ...product,
+                            tax_slabs: (product.tax_slabs || []).filter((_, i) => i !== idx)
+                          })}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))
