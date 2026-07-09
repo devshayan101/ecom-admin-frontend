@@ -293,7 +293,9 @@ export interface UploadUrlResponse {
 export interface TaxRule {
   _id?: string;
   country: string;
+  countryCode: string;
   state: string;
+  stateCode: string;
   rate: number;
   name: string;
   active: boolean;
@@ -317,9 +319,22 @@ export interface GeneralSettings {
   language: string;
 }
 
+export interface StateConfig {
+  name: string;
+  code: string;
+}
+
+export interface CountryConfig {
+  _id?: string;
+  name: string;
+  code: string;
+  states: StateConfig[];
+}
+
 export interface TaxSettings {
   taxRules: TaxRule[];
   gstVatSettings: GstVatSettings;
+  countriesConfig?: CountryConfig[];
 }
 
 export interface Settings {
