@@ -60,18 +60,21 @@ export default function ShippingSettingsPage() {
     dhl: { enabled: false, sandbox: true, apiKey: "" }
   });
 
+  // Country Config list from General Settings
+  const [countriesConfig, setCountriesConfig] = useState<any[]>([]);
+
   // Zone Modal State
   const [isZoneModalOpen, setIsZoneModalOpen] = useState(false);
   const [currentZoneIndex, setCurrentZoneIndex] = useState<number | null>(null);
   const [zoneForm, setZoneForm] = useState<{
     name: string;
-    countriesStr: string;
-    statesStr: string;
+    countries: string[];
+    states: string[];
     active: boolean;
   }>({
     name: "",
-    countriesStr: "",
-    statesStr: "",
+    countries: [],
+    states: [],
     active: true
   });
 
@@ -99,33 +102,36 @@ export default function ShippingSettingsPage() {
     setLoading(true);
     try {
       const response = await apiGet<any>("/settings");
-      if (response && response.shipping) {
-        setShippingEnabled(response.shipping.enabled || false);
-        setZones(response.shipping.zones || []);
-        if (response.shipping.carriers) {
-          setCarriers({
-            delhivery: {
-              enabled: response.shipping.carriers.delhivery?.enabled || false,
-              sandbox: response.shipping.carriers.delhivery?.sandbox ?? true,
-              apiKey: response.shipping.carriers.delhivery?.apiKey || "",
-              apiSecret: response.shipping.carriers.delhivery?.apiSecret || "",
-              accountId: response.shipping.carriers.delhivery?.accountId || "",
-            },
-            fedex: {
-              enabled: response.shipping.carriers.fedex?.enabled || false,
-              sandbox: response.shipping.carriers.fedex?.sandbox ?? true,
-              apiKey: response.shipping.carriers.fedex?.apiKey || "",
-              apiSecret: response.shipping.carriers.fedex?.apiSecret || "",
-              accountId: response.shipping.carriers.fedex?.accountId || "",
-            },
-            dhl: {
-              enabled: response.shipping.carriers.dhl?.enabled || false,
-              sandbox: response.shipping.carriers.dhl?.sandbox ?? true,
-              apiKey: response.shipping.carriers.dhl?.apiKey || "",
-              apiSecret: response.shipping.carriers.dhl?.apiSecret || "",
-              accountId: response.shipping.carriers.dhl?.accountId || "",
-            }
-          });
+      if (response) {
+        setCountriesConfig(response.taxes?.countriesConfig || []);
+        if (response.shipping) {
+          setShippingEnabled(response.shipping.enabled || false);
+          setZones(response.shipping.zones || []);
+          if (response.shipping.carriers) {
+            setCarriers({
+              delhivery: {
+                enabled: response.shipping.carriers.delhivery?.enabled || false,
+                sandbox: response.shipping.carriers.delhivery?.sandbox ?? true,
+                apiKey: response.shipping.carriers.delhivery?.apiKey || "",
+                apiSecret: response.shipping.carriers.delhivery?.apiSecret || "",
+                accountId: response.shipping.carriers.delhivery?.accountId || "",
+              },
+              fedex: {
+                enabled: response.shipping.carriers.fedex?.enabled || false,
+                sandbox: response.shipping.carriers.fedex?.sandbox ?? true,
+                apiKey: response.shipping.carriers.fedex?.apiKey || "",
+                apiSecret: response.shipping.carriers.fedex?.apiSecret || "",
+                accountId: response.shipping.carriers.fedex?.accountId || "",
+              },
+              dhl: {
+                enabled: response.shipping.carriers.dhl?.enabled || false,
+                sandbox: response.shipping.carriers.dhl?.sandbox ?? true,
+                apiKey: response.shipping.carriers.dhl?.apiKey || "",
+                apiSecret: response.shipping.carriers.dhl?.apiSecret || "",
+                accountId: response.shipping.carriers.dhl?.accountId || "",
+              }
+            });
+          }
         }
       }
     } catch (err) {
@@ -168,16 +174,16 @@ export default function ShippingSettingsPage() {
       const zone = zones[index];
       setZoneForm({
         name: zone.name,
-        countriesStr: zone.countries.join(", "),
-        statesStr: zone.states.join(", "),
+        countries: zone.countries || [],
+        states: zone.states || [],
         active: zone.active
       });
       setCurrentZoneIndex(index);
     } else {
       setZoneForm({
         name: "",
-        countriesStr: "",
-        statesStr: "",
+        countries: [],
+        states: [],
         active: true
       });
       setCurrentZoneIndex(null);
@@ -191,29 +197,20 @@ export default function ShippingSettingsPage() {
       return;
     }
 
-    const countries = zoneForm.countriesStr
-      .split(",")
-      .map(c => c.trim())
-      .filter(Boolean);
-    const states = zoneForm.statesStr
-      .split(",")
-      .map(s => s.trim())
-      .filter(Boolean);
-
     const updatedZones = [...zones];
     if (currentZoneIndex !== null) {
       updatedZones[currentZoneIndex] = {
         ...updatedZones[currentZoneIndex],
         name: zoneForm.name,
-        countries,
-        states,
+        countries: zoneForm.countries,
+        states: zoneForm.states,
         active: zoneForm.active
       };
     } else {
       updatedZones.push({
         name: zoneForm.name,
-        countries,
-        states,
+        countries: zoneForm.countries,
+        states: zoneForm.states,
         rates: [],
         active: zoneForm.active
       });
@@ -448,7 +445,7 @@ export default function ShippingSettingsPage() {
                           </div>
                           <p className="text-xs text-slate-500 mt-1">
                             <strong>Countries:</strong> {zone.countries.length > 0 ? zone.countries.join(", ") : "All Countries"}{" | "}
-                            <strong>States:</strong> {zone.states.length > 0 ? zone.states.join(", ") : "All States"}
+                            <strong>States:</strong> {zone.states.length > 0 ? zone.states.map((s: string) => s.includes(':') ? s.split(':')[1] : s).join(", ") : "All States"}
                           </p>
                         </div>
                         <div className="flex gap-2">
@@ -592,18 +589,87 @@ export default function ShippingSettingsPage() {
             placeholder="e.g. Domestic (India), North America"
             required
           />
-          <Input
-            label="Countries (Comma separated list, e.g. India, United States)"
-            value={zoneForm.countriesStr}
-            onChange={(e) => setZoneForm(prev => ({ ...prev, countriesStr: e.target.value }))}
-            placeholder="e.g. India, United States (Leave empty for all countries)"
-          />
-          <Input
-            label="States / Region Codes (Comma separated list, e.g. PB, CA)"
-            value={zoneForm.statesStr}
-            onChange={(e) => setZoneForm(prev => ({ ...prev, statesStr: e.target.value }))}
-            placeholder="e.g. PB, HR, CA (Leave empty for all states)"
-          />
+          {/* Countries selector tags imported from General Settings */}
+          <div className="space-y-2">
+            <label className="text-xs font-semibold text-slate-500 uppercase block">Select Countries (Imported from General Settings)</label>
+            {countriesConfig.length === 0 ? (
+              <p className="text-xs text-amber-600 font-medium italic">No countries configured in General Settings. Please add countries in General settings first.</p>
+            ) : (
+              <div className="flex flex-wrap gap-1.5">
+                {countriesConfig.map((c) => {
+                  const isSelected = zoneForm.countries.includes(c.name);
+                  return (
+                    <button
+                      type="button"
+                      key={c.code}
+                      onClick={() => {
+                        setZoneForm(prev => {
+                          const nextCountries = isSelected
+                            ? prev.countries.filter(name => name !== c.name)
+                            : [...prev.countries, c.name];
+                          
+                          // If unselected, clean up associated states
+                          const nextStates = isSelected
+                            ? prev.states.filter(sCode => !c.states.some((s: any) => s.code === sCode))
+                            : prev.states;
+                          
+                          return { ...prev, countries: nextCountries, states: nextStates };
+                        });
+                      }}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all cursor-pointer ${
+                        isSelected
+                          ? 'bg-blue-600 border-blue-600 text-white shadow-sm'
+                          : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
+                      }`}
+                    >
+                      {c.name} ({c.code})
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* States selector tags imported from General Settings */}
+          {countriesConfig.filter(c => zoneForm.countries.includes(c.name) && c.states && c.states.length > 0).length > 0 && (
+            <div className="space-y-2 pt-2 border-t border-slate-100">
+              <label className="text-xs font-semibold text-slate-500 uppercase block">Select States / Regions</label>
+              <div className="space-y-3 max-h-48 overflow-y-auto pr-1">
+                {countriesConfig.filter(c => zoneForm.countries.includes(c.name) && c.states && c.states.length > 0).map(c => (
+                  <div key={c.code} className="space-y-1">
+                    <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">{c.name} States:</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {c.states.map((s: any) => {
+                        const stateKey = `${c.code}:${s.code}`;
+                        const isSelected = zoneForm.states.includes(stateKey);
+                        return (
+                          <button
+                            type="button"
+                            key={s.code}
+                            onClick={() => {
+                              setZoneForm(prev => {
+                                const nextStates = isSelected
+                                  ? prev.states.filter(code => code !== stateKey)
+                                  : [...prev.states, stateKey];
+                                return { ...prev, states: nextStates };
+                              });
+                            }}
+                            className={`px-2.5 py-1 rounded border text-xs font-medium transition-all cursor-pointer ${
+                              isSelected
+                                ? 'bg-emerald-600 border-emerald-600 text-white shadow-sm'
+                                : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
+                            }`}
+                          >
+                            {s.name} ({s.code})
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           <div className="flex items-center gap-3">
             <input
               type="checkbox"
