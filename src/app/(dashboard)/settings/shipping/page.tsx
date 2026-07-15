@@ -272,7 +272,7 @@ export default function ShippingSettingsPage() {
 
     const updatedZones = [...zones];
     const zone = updatedZones[activeZoneIndexForRates];
-    
+
     if (currentRateIndex !== null) {
       zone.rates[currentRateIndex] = newRate;
     } else {
@@ -445,7 +445,13 @@ export default function ShippingSettingsPage() {
                           </div>
                           <p className="text-xs text-slate-500 mt-1">
                             <strong>Countries:</strong> {zone.countries.length > 0 ? zone.countries.join(", ") : "All Countries"}{" | "}
-                            <strong>States:</strong> {zone.states.length > 0 ? zone.states.map((s: string) => s.includes(':') ? s.split(':')[1] : s).join(", ") : "All States"}
+                            <strong>States:</strong> {zone.states.length > 0 ? zone.states.map((s: string) => {
+                              if (!s.includes(':')) return s;
+                              const [countryCode, stateCode] = s.split(':');
+                              const country = countriesConfig.find(c => c.code === countryCode);
+                              const state = country?.states?.find((st: any) => st.code === stateCode);
+                              return state?.name || stateCode;
+                            }).join(", ") : "All States"}
                           </p>
                         </div>
                         <div className="flex gap-2">
@@ -597,7 +603,7 @@ export default function ShippingSettingsPage() {
             ) : (
               <div className="flex flex-wrap gap-1.5">
                 {countriesConfig.map((c) => {
-                  const isSelected = zoneForm.countries.includes(c.name);
+                  const isSelected = zoneForm.countries.includes(c.code);
                   return (
                     <button
                       type="button"
@@ -607,20 +613,19 @@ export default function ShippingSettingsPage() {
                           const nextCountries = isSelected
                             ? prev.countries.filter(name => name !== c.name)
                             : [...prev.countries, c.name];
-                          
+
                           // If unselected, clean up associated states
                           const nextStates = isSelected
-                            ? prev.states.filter(sCode => !c.states.some((s: any) => s.code === sCode))
+                            ? prev.states.filter(sCode => !sCode.startsWith(`${c.code}:`))
                             : prev.states;
-                          
+
                           return { ...prev, countries: nextCountries, states: nextStates };
                         });
                       }}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all cursor-pointer ${
-                        isSelected
-                          ? 'bg-blue-600 border-blue-600 text-white shadow-sm'
-                          : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
-                      }`}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all cursor-pointer ${isSelected
+                        ? 'bg-blue-600 border-blue-600 text-white shadow-sm'
+                        : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
+                        }`}
                     >
                       {c.name} ({c.code})
                     </button>
@@ -654,11 +659,10 @@ export default function ShippingSettingsPage() {
                                 return { ...prev, states: nextStates };
                               });
                             }}
-                            className={`px-2.5 py-1 rounded border text-xs font-medium transition-all cursor-pointer ${
-                              isSelected
-                                ? 'bg-emerald-600 border-emerald-600 text-white shadow-sm'
-                                : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
-                            }`}
+                            className={`px-2.5 py-1 rounded border text-xs font-medium transition-all cursor-pointer ${isSelected
+                              ? 'bg-emerald-600 border-emerald-600 text-white shadow-sm'
+                              : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
+                              }`}
                           >
                             {s.name} ({s.code})
                           </button>
