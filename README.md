@@ -7,6 +7,7 @@ A modern, high-performance, and feature-rich E-commerce Admin Dashboard built wi
 - **📊 Dynamic Dashboard**: Real-time overview of sales, orders, and key business metrics.
 - **📦 Product Management**: Full CRUD for products with support for variants, images, and category-specific schemas.
 - **📁 Category Management**: Hierarchical category structure with custom attribute definitions.
+- **🚚 Shipping & Tax Settings**: Configure shipping zones, custom rate rules with user-facing delivery times, state selection per country imported from General Settings, and tax rule slabs.
 - **🛒 Order Tracking**: Manage the full lifecycle of customer orders.
 - **👥 Customer Relations**: View customer history, manage profiles, and track engagement.
 - **🔐 Advanced RBAC**: Role-based access control for managing admin users and permissions.

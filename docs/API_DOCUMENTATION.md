@@ -64,10 +64,11 @@ interface Product {
 -   `POST /categories`: Create a category.
 -   `GET /categories/:id`: Get category details and custom attributes.
 
-### Orders
--   `GET /orders`: List orders (paginated).
--   `GET /orders/:id`: Get order details and items.
--   `PATCH /orders/:id/status`: Update order status.
+### Settings
+-   `GET /settings`: Get system settings configuration (general, taxes, shipping, reviews).
+-   `PUT /settings/general`: Save general store info and country/state definitions.
+-   `PUT /settings/taxes`: Update tax rule definitions and GST/VAT settings.
+-   `PUT /settings/shipping`: Configure shipping zones, custom rate rules (with delivery time), and carrier plugins.
 
 ## ⚠️ Error Handling
 
