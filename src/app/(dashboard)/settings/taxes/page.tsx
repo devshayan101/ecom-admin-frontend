@@ -106,7 +106,7 @@ export default function TaxSettingsPage() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  
+
   // Tax state
   const [gstEnabled, setGstEnabled] = useState(false);
   const [gstin, setGstin] = useState("");
@@ -115,7 +115,8 @@ export default function TaxSettingsPage() {
   const [taxRules, setTaxRules] = useState<TaxRule[]>([]);
   const [countriesConfig, setCountriesConfig] = useState<CountryConfig[]>([]);
 
-  const getStatesForCountryCode = (countryCode: string) => {
+  const getStatesForCountryCode = (countryCode?: string) => {
+    if (!countryCode) return [];
     const matchedCountry = countriesConfig.find(
       (c) => c.code.toLowerCase() === countryCode.toLowerCase()
     );
@@ -546,7 +547,7 @@ export default function TaxSettingsPage() {
                     return {
                       ...prev,
                       state: val,
-                      stateCode: matched ? matched.code : prev.stateCode,
+                      stateCode: matched ? matched.code : "",
                     };
                   });
                 }}

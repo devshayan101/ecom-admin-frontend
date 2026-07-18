@@ -293,9 +293,9 @@ export interface UploadUrlResponse {
 export interface TaxRule {
   _id?: string;
   country: string;
-  countryCode: string;
+  countryCode?: string;
   state: string;
-  stateCode: string;
+  stateCode?: string;
   rate: number;
   name: string;
   active: boolean;
@@ -341,7 +341,39 @@ export interface Settings {
   _id: string;
   general: GeneralSettings;
   taxes: TaxSettings;
+  reviews?: {
+    auto_publish: boolean;
+  };
   created_at: string;
   updated_at: string;
 }
+
+// =========================================
+// Review Types
+// =========================================
+
+export interface AdminReply {
+  text: string;
+  replied_at: string;
+  replied_by: string;
+}
+
+export interface Review {
+  _id: string;
+  product_id: {
+    _id: string;
+    name: string;
+  } | string;
+  customer_id: string;
+  customer_name: string;
+  rating: number;
+  title?: string;
+  comment?: string;
+  images: string[];
+  status: 'pending' | 'approved' | 'rejected';
+  admin_reply?: AdminReply;
+  created_at: string;
+  updated_at: string;
+}
+
 

@@ -45,7 +45,7 @@ export default function GeneralSettingsPage() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [formData, setFormData] = useState<GeneralSettings>({
+  const [formData, setFormData] = useState<GeneralSettings & { reviews?: { auto_publish: boolean } }>({
     storeName: "",
     storeEmail: "",
     storePhone: "",
@@ -54,22 +54,28 @@ export default function GeneralSettingsPage() {
     currency: "USD",
     timeZone: "UTC",
     language: "en",
+    reviews: {
+      auto_publish: false,
+    },
   });
 
   const fetchSettings = async () => {
     setLoading(true);
     try {
       const response = await apiGet<Settings>("/settings");
-      if (response && response.general) {
+      if (response) {
         setFormData({
-          storeName: response.general.storeName || "",
-          storeEmail: response.general.storeEmail || "",
-          storePhone: response.general.storePhone || "",
-          logoUrl: response.general.logoUrl || "",
-          faviconUrl: response.general.faviconUrl || "",
-          currency: response.general.currency || "USD",
-          timeZone: response.general.timeZone || "UTC",
-          language: response.general.language || "en",
+          storeName: response.general?.storeName || "",
+          storeEmail: response.general?.storeEmail || "",
+          storePhone: response.general?.storePhone || "",
+          logoUrl: response.general?.logoUrl || "",
+          faviconUrl: response.general?.faviconUrl || "",
+          currency: response.general?.currency || "USD",
+          timeZone: response.general?.timeZone || "UTC",
+          language: response.general?.language || "en",
+          reviews: {
+            auto_publish: response.reviews?.auto_publish || false,
+          },
         });
       }
     } catch (err) {
@@ -252,6 +258,37 @@ export default function GeneralSettingsPage() {
               onChange={handleChange}
               disabled={isReadOnly || saving}
             />
+          </div>
+        </Card>
+
+        <Card className="p-6">
+          <h2 className="text-lg font-semibold text-foreground mb-4">Reviews Policy</h2>
+          <div className="flex items-start gap-3">
+            <div className="flex h-5 items-center">
+              <input
+                id="auto_publish"
+                name="auto_publish"
+                type="checkbox"
+                checked={formData.reviews?.auto_publish || false}
+                onChange={(e) => {
+                  const checked = e.target.checked;
+                  setFormData((prev) => ({
+                    ...prev,
+                    reviews: { auto_publish: checked },
+                  }));
+                }}
+                disabled={isReadOnly || saving}
+                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
+              />
+            </div>
+            <div className="text-sm leading-6">
+              <label htmlFor="auto_publish" className="font-semibold text-foreground cursor-pointer">
+                Auto-Publish Customer Reviews
+              </label>
+              <p className="text-xs text-muted-foreground">
+                If enabled, submitted reviews will appear on the storefront immediately. If disabled, new reviews remain in a pending state until approved by an administrator.
+              </p>
+            </div>
           </div>
         </Card>
 
