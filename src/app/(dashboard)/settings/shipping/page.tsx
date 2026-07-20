@@ -21,6 +21,7 @@ interface CustomRate {
   minLimit?: number;
   maxLimit?: number;
   active: boolean;
+  deliveryTime?: string;
 }
 
 interface CarrierConfig {
@@ -89,13 +90,15 @@ export default function ShippingSettingsPage() {
     minLimit: number;
     maxLimit: number;
     active: boolean;
+    deliveryTime: string;
   }>({
     name: "",
     type: "flat",
     price: 0,
     minLimit: 0,
     maxLimit: 0,
-    active: true
+    active: true,
+    deliveryTime: ""
   });
 
   const fetchSettings = async () => {
@@ -237,7 +240,8 @@ export default function ShippingSettingsPage() {
         price: rate.price,
         minLimit: rate.minLimit || 0,
         maxLimit: rate.maxLimit || 0,
-        active: rate.active
+        active: rate.active,
+        deliveryTime: rate.deliveryTime || ""
       });
       setCurrentRateIndex(rateIndex);
     } else {
@@ -247,7 +251,8 @@ export default function ShippingSettingsPage() {
         price: 0,
         minLimit: 0,
         maxLimit: 0,
-        active: true
+        active: true,
+        deliveryTime: ""
       });
       setCurrentRateIndex(null);
     }
@@ -267,7 +272,8 @@ export default function ShippingSettingsPage() {
       price: rateForm.price,
       minLimit: rateForm.type !== 'flat' ? rateForm.minLimit : undefined,
       maxLimit: rateForm.type !== 'flat' && rateForm.maxLimit > 0 ? rateForm.maxLimit : undefined,
-      active: rateForm.active
+      active: rateForm.active,
+      deliveryTime: rateForm.deliveryTime || undefined
     };
 
     const updatedZones = [...zones];
@@ -489,6 +495,7 @@ export default function ShippingSettingsPage() {
                                   <th className="py-2">Rate Name</th>
                                   <th className="py-2">Rule Type</th>
                                   <th className="py-2">Conditions</th>
+                                  <th className="py-2">Delivery Time</th>
                                   <th className="py-2">Price</th>
                                   <th className="py-2">Status</th>
                                   <th className="py-2 text-right">Action</th>
@@ -504,6 +511,7 @@ export default function ShippingSettingsPage() {
                                       {rate.type === 'price_based' && `Price: ₹${rate.minLimit || 0} - ${rate.maxLimit ? `₹${rate.maxLimit}` : 'No limit'}`}
                                       {rate.type === 'weight_based' && `Weight: ${rate.minLimit || 0}g - ${rate.maxLimit ? `${rate.maxLimit}g` : 'No limit'}`}
                                     </td>
+                                    <td className="py-2 text-slate-500">{rate.deliveryTime || "-"}</td>
                                     <td className="py-2 font-bold text-slate-800">₹{rate.price}</td>
                                     <td className="py-2">
                                       <Badge variant={rate.active ? "success" : "default"}>{rate.active ? "Active" : "Disabled"}</Badge>
@@ -752,6 +760,13 @@ export default function ShippingSettingsPage() {
               />
             </div>
           )}
+
+          <Input
+            label="Delivery Time (e.g. 3-5 business days)"
+            value={rateForm.deliveryTime}
+            onChange={(e) => setRateForm(prev => ({ ...prev, deliveryTime: e.target.value }))}
+            placeholder="e.g. 2-3 business days"
+          />
 
           <div className="flex items-center gap-3">
             <input
