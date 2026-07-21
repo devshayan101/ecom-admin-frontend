@@ -337,12 +337,32 @@ export interface TaxSettings {
   countriesConfig?: CountryConfig[];
 }
 
+export interface PaymentGatewayConfig {
+  enabled: boolean;
+  sandbox: boolean;
+  keyId: string;
+  secretKey: string;
+  webhookSecret: string;
+}
+
+export interface CodSettings {
+  enabled: boolean;
+  minOrderAmount: number;
+  maxOrderAmount: number;
+  instructions: string;
+}
+
 export interface Settings {
   _id: string;
   general: GeneralSettings;
   taxes: TaxSettings;
   reviews?: {
     auto_publish: boolean;
+  };
+  payments?: {
+    razorpay: PaymentGatewayConfig;
+    stripe: PaymentGatewayConfig;
+    cod: CodSettings;
   };
   created_at: string;
   updated_at: string;
