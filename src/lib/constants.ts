@@ -63,3 +63,13 @@ export const ATTRIBUTE_TYPE_LABELS: Record<string, string> = {
   boolean: "Yes/No",
   enum: "Dropdown",
 };
+
+export const CURRENCY_SYMBOLS: Record<string, string> = {
+  USD: "$",
+  EUR: "€",
+  GBP: "£",
+  INR: "₹",
+  CAD: "CA$",
+  AUD: "A$",
+};
+

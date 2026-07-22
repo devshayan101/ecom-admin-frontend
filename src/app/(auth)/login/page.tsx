@@ -1,14 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import AuthLayout from "@/components/auth/AuthLayout";
 import { apiPost } from "@/lib/api-client";
 import { setToken, parseJwt, getUserPermissions } from "@/lib/auth";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -32,7 +30,7 @@ export default function LoginPage() {
           localStorage.setItem("user_permissions", JSON.stringify(getUserPermissions(payload.role)));
         }
       }
-      router.push("/dashboard");
+      window.location.href = "/dashboard";
     } catch (err: any) {
       if (err.response?.status === 429) {
         setError("Too many attempts. Please try again later.");

@@ -4,18 +4,27 @@ import { useEffect, useState } from "react";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/Card";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { apiGet } from "@/lib/api-client";
-import type { DashboardSummary } from "@/lib/types";
+import type { DashboardSummary, Settings } from "@/lib/types";
 import dayjs from "dayjs";
 import TopProducts from "@/components/dashboard/TopProducts";
+import { CURRENCY_SYMBOLS } from "@/lib/constants";
 
 export default function DashboardPage() {
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
+  const [currencySymbol, setCurrencySymbol] = useState<string>("$");
   const [loading, setLoading] = useState(true);
 
   const fetchSummary = async () => {
     try {
-      const data = await apiGet<DashboardSummary>("/dashboard/summary");
-      setSummary(data);
+      const [summaryData, settingsData] = await Promise.all([
+        apiGet<DashboardSummary>("/dashboard/summary"),
+        apiGet<Settings>("/settings")
+      ]);
+      setSummary(summaryData);
+      
+      const currency = settingsData?.general?.currency || "USD";
+      const symbol = CURRENCY_SYMBOLS[currency] || "$";
+      setCurrencySymbol(symbol);
     } catch (error) {
       console.error("Failed to fetch dashboard summary", error);
     } finally {
@@ -44,7 +53,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold text-foreground">
-              ${summary?.today_revenue?.toFixed(2) || "0.00"}
+              {currencySymbol}{summary?.today_revenue?.toFixed(2) || "0.00"}
             </p>
           </CardContent>
         </Card>
@@ -55,7 +64,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold text-foreground">
-              ${summary?.weekly_revenue?.toFixed(2) || "0.00"}
+              {currencySymbol}{summary?.weekly_revenue?.toFixed(2) || "0.00"}
             </p>
           </CardContent>
         </Card>
@@ -66,7 +75,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold text-foreground">
-              ${summary?.monthly_revenue?.toFixed(2) || "0.00"}
+              {currencySymbol}{summary?.monthly_revenue?.toFixed(2) || "0.00"}
             </p>
           </CardContent>
         </Card>
@@ -101,7 +110,7 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <TopProducts />
+      <TopProducts currencySymbol={currencySymbol} />
     </div>
   );
 }

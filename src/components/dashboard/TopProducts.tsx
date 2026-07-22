@@ -6,7 +6,11 @@ import type { TopProduct } from "@/lib/types";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { getApiError } from "@/lib/api-client";
 
-export default function TopProducts() {
+interface TopProductsProps {
+  currencySymbol?: string;
+}
+
+export default function TopProducts({ currencySymbol = "$" }: TopProductsProps) {
   const [products, setProducts] = useState<TopProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -71,7 +75,7 @@ export default function TopProducts() {
                     {product.units_sold}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground text-right">
-                    ${product.revenue?.toFixed(2)}
+                    {currencySymbol}{product.revenue?.toFixed(2)}
                   </td>
                 </tr>
               ))
