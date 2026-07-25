@@ -115,11 +115,18 @@ export interface Order {
   _id: string;
   customer_id: string;
   status: 'PENDING' | 'CONFIRMED' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
-  payment_status: 'UNPAID' | 'PAID';
+  payment_status: 'UNPAID' | 'PAID' | 'REFUNDED' | 'PARTIALLY_REFUNDED';
+  payment_method?: 'STRIPE' | 'RAZORPAY' | 'COD';
   stripe_payment_intent_id?: string;
+  razorpay_order_id?: string;
+  razorpay_payment_id?: string;
   idempotency_key?: string;
   payment_deadline_at?: string;
   paid_at?: string;
+  refunded_at?: string;
+  refund_amount?: number;
+  refund_reason?: string;
+  refund_id?: string;
   cancel_reason?: 'PAYMENT_TIMEOUT' | 'ADMIN_CANCELLED' | 'MANUAL_REMEDIATION' | null;
   shipping_address: Address;
   items: OrderItem[];
@@ -133,6 +140,12 @@ export interface Order {
 export interface UpdateOrderStatusRequest {
   status: 'CONFIRMED' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
   cancel_reason?: string;
+}
+
+export interface ProcessRefundRequest {
+  amount?: number;
+  reason?: string;
+  restock?: boolean;
 }
 
 // =========================================
