@@ -54,6 +54,8 @@ export default function OrderDetailPage() {
   if (loading) return <div className="py-12 text-center">Loading...</div>;
   if (!order) return <div className="py-12 text-center">Order not found</div>;
 
+  const currencySymbol = order.currency === "INR" ? "₹" : order.currency === "USD" ? "$" : `${order.currency || "$"} `;
+
   const allowedTransitions = ORDER_STATUS_FLOW[order.status] || [];
 
   return (
@@ -91,7 +93,7 @@ export default function OrderDetailPage() {
             </div>
             <div className="flex justify-between">
               <span className="text-sm text-foreground">Total</span>
-              <span className="font-medium">${order.total_amount?.toFixed(2)}</span>
+              <span className="font-medium">{currencySymbol}{order.total_amount?.toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-sm text-foreground">Date</span>
@@ -140,7 +142,7 @@ export default function OrderDetailPage() {
                   <p className="font-medium">{item.sku}</p>
                   <p className="text-sm text-foreground">Qty: {item.quantity}</p>
                 </div>
-                <p className="font-medium">${item.price_at_purchase?.toFixed(2)}</p>
+                <p className="font-medium">{currencySymbol}{item.price_at_purchase?.toFixed(2)}</p>
               </div>
             ))}
           </div>

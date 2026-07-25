@@ -58,7 +58,10 @@ export default function OrdersPage() {
     {
       key: "total_amount",
       title: "Total",
-      render: (o: Order) => <span>${o.total_amount?.toFixed(2)}</span>,
+      render: (o: Order) => {
+        const symbol = o.currency === "INR" ? "₹" : o.currency === "USD" ? "$" : `${o.currency || "$"} `;
+        return <span>{symbol}{o.total_amount?.toFixed(2)}</span>;
+      },
     },
     {
       key: "actions",

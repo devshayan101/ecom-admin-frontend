@@ -124,6 +124,7 @@ export interface Order {
   shipping_address: Address;
   items: OrderItem[];
   total_amount: number;
+  currency?: string;
   created_at: string;
   updated_at: string;
   customer_name?: string;
