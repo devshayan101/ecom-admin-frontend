@@ -64,7 +64,7 @@ export default function TopProducts({ currencySymbol = "$" }: TopProductsProps) 
               </tr>
             ) : (
               products.map((product, idx) => (
-                <tr key={product.product_id} className={idx % 2 === 0 ? "bg-background" : "bg-muted/50"}>
+                <tr key={product.product_id ? `${product.product_id}-${idx}` : idx} className={idx % 2 === 0 ? "bg-background" : "bg-muted/50"}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">
                     {product.name}
                   </td>
