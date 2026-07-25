@@ -8,7 +8,7 @@ interface Column<T> {
 interface TableProps<T> {
   data: T[];
   columns: Column<T>[];
-  keyExtractor: (item: T) => string;
+  keyExtractor: (item: T, index: number) => string;
   loading?: boolean;
   emptyMessage?: string;
   onRowClick?: (item: T) => void;
@@ -51,9 +51,9 @@ export default function Table<T>({
           </tr>
         </thead>
         <tbody className="divide-y divide-border">
-          {data.map((item) => (
+          {data.map((item, index) => (
             <tr
-              key={keyExtractor(item)}
+              key={keyExtractor(item, index)}
               className={onRowClick ? "hover:bg-muted/50 cursor-pointer" : ""}
               onClick={() => onRowClick?.(item)}
             >

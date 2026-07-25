@@ -128,13 +128,15 @@ export default function TaxSettingsPage() {
 
   // Add rule modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newRule, setNewRule] = useState<Omit<TaxRule, "_id">>({
-    country: "",
-    countryCode: "",
-    state: "",
-    stateCode: "",
-    rate: 0,
+  const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
+  const [selectedStates, setSelectedStates] = useState<string[]>([]); // Format "COUNTRY_CODE:STATE_CODE"
+  const [newRule, setNewRule] = useState<{
+    name: string;
+    rate: number;
+    active: boolean;
+  }>({
     name: "",
+    rate: 0,
     active: true,
   });
 
@@ -189,22 +191,74 @@ export default function TaxSettingsPage() {
     }
   };
 
-  const handleAddRule = () => {
-    if (!newRule.country || !newRule.countryCode || !newRule.name || newRule.rate < 0) {
-      toast.error("Please enter a valid country name, country code, rule name, and rate.");
-      return;
-    }
-    setTaxRules((prev) => [...prev, { ...newRule }]);
-    setIsModalOpen(false);
+  const openAddRuleModal = () => {
+    setSelectedCountries([]);
+    setSelectedStates([]);
     setNewRule({
-      country: "",
-      countryCode: "",
-      state: "",
-      stateCode: "",
-      rate: 0,
       name: "",
+      rate: 0,
       active: true,
     });
+    setIsModalOpen(true);
+  };
+
+  const handleAddRule = () => {
+    if (!newRule.name.trim() || newRule.rate < 0) {
+      toast.error("Please enter a valid rule name and non-negative rate.");
+      return;
+    }
+
+    if (selectedCountries.length === 0) {
+      toast.error("Please select at least one country.");
+      return;
+    }
+
+    const createdRules: TaxRule[] = [];
+
+    selectedCountries.forEach((countryName) => {
+      const countryObj = countriesConfig.find((c) => c.name === countryName);
+      const countryCode = countryObj?.code || "";
+
+      // Check if specific states were selected for this country
+      const countryStateKeys = selectedStates.filter((sKey) => sKey.startsWith(`${countryCode}:`));
+
+      const isDuplicate = (stateCode: string) =>
+        taxRules.some((r) => r.countryCode === countryCode && (r.stateCode || "") === stateCode) ||
+        createdRules.some((r) => r.countryCode === countryCode && (r.stateCode || "") === stateCode);
+
+      if (countryStateKeys.length > 0) {
+        countryStateKeys.forEach((sKey) => {
+          const sCode = sKey.split(":")[1];
+          if (isDuplicate(sCode)) return;
+          const stateObj = countryObj?.states?.find((s) => s.code === sCode);
+          createdRules.push({
+            name: newRule.name,
+            country: countryName,
+            countryCode,
+            state: stateObj?.name || "",
+            stateCode: sCode,
+            rate: newRule.rate,
+            active: newRule.active,
+          });
+        });
+      } else {
+        // All states for this country
+        if (isDuplicate("")) return;
+        createdRules.push({
+          name: newRule.name,
+          country: countryName,
+          countryCode,
+          state: "",
+          stateCode: "",
+          rate: newRule.rate,
+          active: newRule.active,
+        });
+      }
+    });
+
+    setTaxRules((prev) => [...prev, ...createdRules]);
+    setIsModalOpen(false);
+    toast.success(`Added ${createdRules.length} tax rule(s).`);
   };
 
   const handleDeleteRule = (rule: TaxRule) => {
@@ -361,7 +415,7 @@ export default function TaxSettingsPage() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-foreground">Tax Rules</h2>
             {!isReadOnly && (
-              <Button type="button" onClick={() => setIsModalOpen(true)}>
+              <Button type="button" onClick={openAddRuleModal}>
                 <Plus className="h-4 w-4 mr-2" />
                 Add Rule
               </Button>
@@ -371,7 +425,7 @@ export default function TaxSettingsPage() {
           <Table
             data={taxRules}
             columns={columns}
-            keyExtractor={(rule) => `${rule.name}-${rule.country}-${rule.state || "all"}`}
+            keyExtractor={(rule, index) => rule._id || `${rule.name}-${rule.country}-${rule.countryCode}-${rule.state || "all"}-${rule.rate}-${index}`}
             loading={false}
             emptyMessage="No custom tax rules added yet."
           />
@@ -412,63 +466,7 @@ export default function TaxSettingsPage() {
             placeholder="e.g. Standard VAT, State Sales Tax"
             required
           />
-          <div className="grid grid-cols-2 gap-4">
-            <Input
-              label="Country Name"
-              id="ruleCountry"
-              value={newRule.country}
-              onChange={(e) => setNewRule((prev) => ({ ...prev, country: e.target.value }))}
-              placeholder="e.g. United States, India"
-              required
-            />
-            <Input
-              label="Country Code"
-              id="ruleCountryCode"
-              value={newRule.countryCode}
-              onChange={(e) => setNewRule((prev) => ({ ...prev, countryCode: e.target.value }))}
-              placeholder="e.g. US, IN, GB"
-              required
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="relative">
-              <Input
-                label="State / Region (Optional)"
-                id="ruleState"
-                value={newRule.state}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  setNewRule((prev) => {
-                    const states = [{ name: "All States", code: "ALL" }, ...getStatesForCountryCode(prev.countryCode)];
-                    const matched = states.find(
-                      (s) => s.name.toLowerCase() === val.toLowerCase()
-                    );
-                    return {
-                      ...prev,
-                      state: val,
-                      stateCode: matched ? matched.code : "",
-                    };
-                  });
-                }}
-                placeholder="e.g. Punjab, California"
-                list="states-datalist"
-              />
-              <datalist id="states-datalist">
-                {[{ name: "All States", code: "ALL" }, ...getStatesForCountryCode(newRule.countryCode)].map((s) => (
-                  <option key={s.code} value={s.name}>
-                    {s.name} ({s.code})
-                  </option>
-                ))}
-              </datalist>
-            </div>
-            <Input
-              label="State Code (Optional)"
-              id="ruleStateCode"
-              value={newRule.stateCode}
-              onChange={(e) => setNewRule((prev) => ({ ...prev, stateCode: e.target.value }))}
-              placeholder="e.g. PB, CA"
-            />
-          </div>
+
           <Input
             label="Tax Rate (%)"
             id="ruleRate"
@@ -479,6 +477,82 @@ export default function TaxSettingsPage() {
             placeholder="e.g. 18.5"
             required
           />
+
+          {/* Countries selector chips imported from General Settings */}
+          <div className="space-y-2">
+            <label className="text-xs font-semibold text-slate-500 uppercase block">Select Countries (Imported from General Settings)</label>
+            {countriesConfig.length === 0 ? (
+              <p className="text-xs text-amber-600 font-medium italic">No countries configured in General Settings. Please add countries in General settings first.</p>
+            ) : (
+              <div className="flex flex-wrap gap-1.5">
+                {countriesConfig.map((c) => {
+                  const isSelected = selectedCountries.includes(c.name);
+                  return (
+                    <button
+                      type="button"
+                      key={c.code}
+                      onClick={() => {
+                        if (isSelected) {
+                          setSelectedCountries((prev) => prev.filter((name) => name !== c.name));
+                          setSelectedStates((prev) => prev.filter((sKey) => !sKey.startsWith(`${c.code}:`)));
+                        } else {
+                          setSelectedCountries((prev) => [...prev, c.name]);
+                        }
+                      }}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all cursor-pointer ${isSelected
+                        ? "bg-blue-600 border-blue-600 text-white shadow-sm"
+                        : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"
+                        }`}
+                    >
+                      {c.name} ({c.code})
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* States selector chips imported from General Settings */}
+          {countriesConfig.filter((c) => selectedCountries.includes(c.name) && c.states && c.states.length > 0).length > 0 && (
+            <div className="space-y-2 pt-2 border-t border-slate-100">
+              <label className="text-xs font-semibold text-slate-500 uppercase block">Select States / Regions (Optional - Leave unselected for All States)</label>
+              <div className="space-y-3 max-h-48 overflow-y-auto pr-1">
+                {countriesConfig
+                  .filter((c) => selectedCountries.includes(c.name) && c.states && c.states.length > 0)
+                  .map((c) => (
+                    <div key={c.code} className="space-y-1">
+                      <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">{c.name} States:</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {c.states.map((s: StateConfig) => {
+                          const stateKey = `${c.code}:${s.code}`;
+                          const isSelected = selectedStates.includes(stateKey);
+                          return (
+                            <button
+                              type="button"
+                              key={s.code}
+                              onClick={() => {
+                                setSelectedStates((prev) =>
+                                  isSelected
+                                    ? prev.filter((key) => key !== stateKey)
+                                    : [...prev, stateKey]
+                                );
+                              }}
+                              className={`px-2.5 py-1 rounded border text-xs font-medium transition-all cursor-pointer ${isSelected
+                                ? "bg-emerald-600 border-emerald-600 text-white shadow-sm"
+                                : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"
+                                }`}
+                            >
+                              {s.name} ({s.code})
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
+
           <div className="flex items-center gap-3">
             <input
               type="checkbox"
