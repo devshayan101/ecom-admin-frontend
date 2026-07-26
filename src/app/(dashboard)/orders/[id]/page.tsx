@@ -138,7 +138,7 @@ export default function OrderDetailPage() {
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Order Info</CardTitle>
             {canRefund && (
-              <Button size="sm" variant="secondary" onClick={handleOpenRefundModal}>
+              <Button size="sm" variant="destructive" onClick={handleOpenRefundModal}>
                 <RefreshCw className="h-4 w-4 mr-1" /> Process Refund
               </Button>
             )}
@@ -340,7 +340,7 @@ export default function OrderDetailPage() {
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t">
-            <Button variant="secondary" onClick={() => setShowRefundModal(false)} disabled={refunding}>
+            <Button variant="primary" onClick={() => setShowRefundModal(false)} disabled={refunding}>
               Cancel
             </Button>
             <Button variant="destructive" onClick={handleProcessRefund} loading={refunding} disabled={refunding}>
