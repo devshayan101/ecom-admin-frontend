@@ -87,7 +87,15 @@ export default function ContentSettingsPage() {
         heroSlides: heroSlides.map((s, idx) => ({ ...s, sortOrder: idx })),
         promotionCards: promotionCards.map((p, idx) => ({ ...p, sortOrder: idx })),
       };
-      await apiPut("/settings/content", payload);
+      try {
+        await apiPut("/settings/content", payload);
+      } catch (err: any) {
+        if (err?.response?.status === 404) {
+          await apiPut("/settings/general", { content: payload });
+        } else {
+          throw err;
+        }
+      }
       toast.success("Homepage content settings saved successfully!");
       fetchSettings();
     } catch (err) {
