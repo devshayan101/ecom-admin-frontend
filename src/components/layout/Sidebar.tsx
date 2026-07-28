@@ -21,6 +21,7 @@ import {
   MessageSquare,
   Truck,
   CreditCard,
+  LayoutTemplate,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -44,6 +45,7 @@ const navItems: NavItem[] = [
   { href: "/audit-logs", label: "Audit Logs", icon: <FileText className="h-5 w-5" /> },
   { href: "/users", label: "Users", icon: <UserCog className="h-5 w-5" />, superadminOnly: true },
   { href: "/settings/general", label: "General Settings", icon: <Settings className="h-5 w-5" />, permission: "settings:read" },
+  { href: "/settings/content", label: "Homepage Content", icon: <LayoutTemplate className="h-5 w-5" />, permission: "settings:read" },
   { href: "/settings/taxes", label: "Tax Settings", icon: <Percent className="h-5 w-5" />, permission: "settings:read" },
   { href: "/settings/shipping", label: "Shipping Settings", icon: <Truck className="h-5 w-5" />, permission: "settings:read" },
   { href: "/settings/payments", label: "Payment Settings", icon: <CreditCard className="h-5 w-5" />, permission: "settings:read" },
