@@ -28,6 +28,11 @@ interface HeroSlide {
   category: string;
   active: boolean;
   sortOrder: number;
+  titleColor?: string;
+  titleHighlightColor?: string;
+  subtitleColor?: string;
+  buttonTextColor?: string;
+  buttonBgColor?: string;
 }
 
 interface PromotionCard {
@@ -43,6 +48,10 @@ interface PromotionCard {
   emoji: string;
   active: boolean;
   sortOrder: number;
+  titleColor?: string;
+  descColor?: string;
+  btnTextColor?: string;
+  btnBgColor?: string;
 }
 
 export default function ContentSettingsPage() {
@@ -128,6 +137,11 @@ export default function ContentSettingsPage() {
         category: "skincare",
         active: true,
         sortOrder: heroSlides.length,
+        titleColor: "#ffffff",
+        titleHighlightColor: "#fcd34d",
+        subtitleColor: "#e2e8f0",
+        buttonTextColor: "#000000",
+        buttonBgColor: "#ffd814",
       });
     }
     setIsSlideModalOpen(true);
@@ -188,6 +202,10 @@ export default function ContentSettingsPage() {
         emoji: "🌿",
         active: true,
         sortOrder: promotionCards.length,
+        titleColor: "#ffffff",
+        descColor: "#e2e8f0",
+        btnTextColor: "#ffffff",
+        btnBgColor: "#0058be",
       });
     }
     setIsPromoModalOpen(true);
@@ -554,6 +572,53 @@ export default function ContentSettingsPage() {
                 placeholder="e.g. skincare"
               />
             </div>
+            <div className="grid grid-cols-5 gap-2 border-t border-b border-border py-3 my-2">
+              <div className="flex flex-col items-center">
+                <label className="text-[10px] font-bold text-muted-foreground mb-1">Heading</label>
+                <input
+                  type="color"
+                  value={editingSlide.titleColor || "#ffffff"}
+                  onChange={(e) => setEditingSlide({ ...editingSlide, titleColor: e.target.value })}
+                  className="w-10 h-10 border border-border rounded cursor-pointer"
+                />
+              </div>
+              <div className="flex flex-col items-center">
+                <label className="text-[10px] font-bold text-muted-foreground mb-1">Highlight</label>
+                <input
+                  type="color"
+                  value={editingSlide.titleHighlightColor || "#fcd34d"}
+                  onChange={(e) => setEditingSlide({ ...editingSlide, titleHighlightColor: e.target.value })}
+                  className="w-10 h-10 border border-border rounded cursor-pointer"
+                />
+              </div>
+              <div className="flex flex-col items-center">
+                <label className="text-[10px] font-bold text-muted-foreground mb-1">Subtitle</label>
+                <input
+                  type="color"
+                  value={editingSlide.subtitleColor || "#e2e8f0"}
+                  onChange={(e) => setEditingSlide({ ...editingSlide, subtitleColor: e.target.value })}
+                  className="w-10 h-10 border border-border rounded cursor-pointer"
+                />
+              </div>
+              <div className="flex flex-col items-center">
+                <label className="text-[10px] font-bold text-muted-foreground mb-1">Btn Text</label>
+                <input
+                  type="color"
+                  value={editingSlide.buttonTextColor || "#000000"}
+                  onChange={(e) => setEditingSlide({ ...editingSlide, buttonTextColor: e.target.value })}
+                  className="w-10 h-10 border border-border rounded cursor-pointer"
+                />
+              </div>
+              <div className="flex flex-col items-center">
+                <label className="text-[10px] font-bold text-muted-foreground mb-1">Btn Bg</label>
+                <input
+                  type="color"
+                  value={editingSlide.buttonBgColor || "#ffd814"}
+                  onChange={(e) => setEditingSlide({ ...editingSlide, buttonBgColor: e.target.value })}
+                  className="w-10 h-10 border border-border rounded cursor-pointer"
+                />
+              </div>
+            </div>
             <div className="flex items-center gap-2 pt-2">
               <input
                 type="checkbox"
@@ -638,6 +703,44 @@ export default function ContentSettingsPage() {
                 onChange={(e) => setEditingPromo({ ...editingPromo, emoji: e.target.value })}
                 placeholder="e.g. 🌿"
               />
+            </div>
+            <div className="grid grid-cols-4 gap-2 border-t border-b border-border py-3 my-2">
+              <div className="flex flex-col items-center">
+                <label className="text-[10px] font-bold text-muted-foreground mb-1">Heading</label>
+                <input
+                  type="color"
+                  value={editingPromo.titleColor || "#ffffff"}
+                  onChange={(e) => setEditingPromo({ ...editingPromo, titleColor: e.target.value })}
+                  className="w-10 h-10 border border-border rounded cursor-pointer"
+                />
+              </div>
+              <div className="flex flex-col items-center">
+                <label className="text-[10px] font-bold text-muted-foreground mb-1">Description</label>
+                <input
+                  type="color"
+                  value={editingPromo.descColor || "#e2e8f0"}
+                  onChange={(e) => setEditingPromo({ ...editingPromo, descColor: e.target.value })}
+                  className="w-10 h-10 border border-border rounded cursor-pointer"
+                />
+              </div>
+              <div className="flex flex-col items-center">
+                <label className="text-[10px] font-bold text-muted-foreground mb-1">Btn Text</label>
+                <input
+                  type="color"
+                  value={editingPromo.btnTextColor || "#ffffff"}
+                  onChange={(e) => setEditingPromo({ ...editingPromo, btnTextColor: e.target.value })}
+                  className="w-10 h-10 border border-border rounded cursor-pointer"
+                />
+              </div>
+              <div className="flex flex-col items-center">
+                <label className="text-[10px] font-bold text-muted-foreground mb-1">Btn Background</label>
+                <input
+                  type="color"
+                  value={editingPromo.btnBgColor || "#0058be"}
+                  onChange={(e) => setEditingPromo({ ...editingPromo, btnBgColor: e.target.value })}
+                  className="w-10 h-10 border border-border rounded cursor-pointer"
+                />
+              </div>
             </div>
             <div className="flex items-center gap-2 pt-2">
               <input

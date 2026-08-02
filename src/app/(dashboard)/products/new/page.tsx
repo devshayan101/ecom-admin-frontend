@@ -12,6 +12,7 @@ import Textarea from "@/components/ui/Textarea";
 import { Card, CardHeader, CardContent } from "@/components/ui/Card";
 import { ArrowLeft, Plus, Trash2, X } from "lucide-react";
 import ImageUpload from "@/components/ImageUpload";
+import ProductDescriptionSections from "@/components/ProductDescriptionSections";
 
 export default function NewProductPage() {
   const router = useRouter();
@@ -29,6 +30,21 @@ export default function NewProductPage() {
   const [images, setImages] = useState<string[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const [topHighlights, setTopHighlights] = useState<any[]>([]);
+  const [aboutThisItem, setAboutThisItem] = useState<string[]>([]);
+  const [additionalInformation, setAdditionalInformation] = useState<any[]>([]);
+  const [styleDetails, setStyleDetails] = useState<any[]>([]);
+  const [featuresSpecs, setFeaturesSpecs] = useState<any[]>([]);
+  const [faqs, setFaqs] = useState<any[]>([]);
+  const [displayConfigs, setDisplayConfigs] = useState<any>({
+    top_highlights: true,
+    about_this_item: true,
+    additional_information: true,
+    style_details: true,
+    features_specs: true,
+    faqs: true,
+  });
 
   interface LocalTaxSlab extends TaxSlab {
     isCustom?: boolean;
@@ -132,6 +148,13 @@ export default function NewProductPage() {
           attributes: v.attributes,
         })),
         tax_slabs: productTaxSlabs.map(({ region, rate }) => ({ region, rate })),
+        top_highlights: topHighlights,
+        about_this_item: aboutThisItem,
+        additional_information: additionalInformation,
+        style_details: styleDetails,
+        features_specs: featuresSpecs,
+        faqs: faqs,
+        display_configs: displayConfigs,
       };
       await apiPost("/products", payload);
       router.push("/products");
@@ -172,6 +195,25 @@ export default function NewProductPage() {
                 />
               </CardContent>
             </Card>
+            
+            <ProductDescriptionSections
+              displayConfigs={displayConfigs}
+              topHighlights={topHighlights}
+              aboutThisItem={aboutThisItem}
+              additionalInformation={additionalInformation}
+              styleDetails={styleDetails}
+              featuresSpecs={featuresSpecs}
+              faqs={faqs}
+              onChange={(updatedFields) => {
+                if (updatedFields.display_configs) setDisplayConfigs(updatedFields.display_configs);
+                if (updatedFields.top_highlights) setTopHighlights(updatedFields.top_highlights);
+                if (updatedFields.about_this_item) setAboutThisItem(updatedFields.about_this_item);
+                if (updatedFields.additional_information) setAdditionalInformation(updatedFields.additional_information);
+                if (updatedFields.style_details) setStyleDetails(updatedFields.style_details);
+                if (updatedFields.features_specs) setFeaturesSpecs(updatedFields.features_specs);
+                if (updatedFields.faqs) setFaqs(updatedFields.faqs);
+              }}
+            />
 
             <Card>
               <CardHeader><h2 className="text-lg font-semibold">Product Images</h2></CardHeader>

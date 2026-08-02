@@ -36,6 +36,25 @@ export interface TaxSlab {
   rate: number;
 }
 
+export interface ProductKeyValue {
+  key: string;
+  value: string;
+}
+
+export interface ProductFaq {
+  question: string;
+  answer: string;
+}
+
+export interface ProductDisplayConfig {
+  top_highlights?: boolean;
+  about_this_item?: boolean;
+  additional_information?: boolean;
+  style_details?: boolean;
+  features_specs?: boolean;
+  faqs?: boolean;
+}
+
 export interface Product {
   _id: string;
   name: string;
@@ -46,6 +65,13 @@ export interface Product {
   status: 'active' | 'draft' | 'archived';
   variants: ProductVariant[];
   tax_slabs?: TaxSlab[];
+  top_highlights?: ProductKeyValue[];
+  about_this_item?: string[];
+  additional_information?: ProductKeyValue[];
+  style_details?: ProductKeyValue[];
+  features_specs?: ProductKeyValue[];
+  faqs?: ProductFaq[];
+  display_configs?: ProductDisplayConfig;
   created_at: string;
   updated_at: string;
   category_name?: string;
@@ -60,6 +86,13 @@ export interface CreateProductRequest {
   status: 'active' | 'draft' | 'archived';
   variants: Omit<ProductVariant, '_id'>[];
   tax_slabs?: TaxSlab[];
+  top_highlights?: ProductKeyValue[];
+  about_this_item?: string[];
+  additional_information?: ProductKeyValue[];
+  style_details?: ProductKeyValue[];
+  features_specs?: ProductKeyValue[];
+  faqs?: ProductFaq[];
+  display_configs?: ProductDisplayConfig;
 }
 
 // =========================================

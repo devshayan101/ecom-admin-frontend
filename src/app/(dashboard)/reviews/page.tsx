@@ -223,7 +223,7 @@ export default function ReviewsPage() {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {filteredReviews.map((review) => {
-                  const productName = typeof review.product_id === "object" ? review.product_id.name : "Unknown Product";
+                  const productName = (review.product_id && typeof review.product_id === "object") ? (review.product_id as any).name : "Unknown Product";
                   return (
                     <tr key={review._id} className="hover:bg-slate-50/50 transition-colors">
                       <td className="px-6 py-4 font-bold text-slate-700 max-w-[200px] truncate">

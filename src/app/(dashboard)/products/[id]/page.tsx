@@ -14,6 +14,7 @@ import { Card, CardHeader, CardContent } from "@/components/ui/Card";
 import { ArrowLeft, Trash2, Plus, X } from "lucide-react";
 import { useAuthContext } from "@/providers/AuthProvider";
 import ImageUpload from "@/components/ImageUpload";
+import ProductDescriptionSections from "@/components/ProductDescriptionSections";
 
 interface LocalTaxSlab extends TaxSlab {
   isCustom?: boolean;
@@ -108,6 +109,13 @@ export default function EditProductPage() {
           attributes: v.attributes,
         })),
         tax_slabs: product.tax_slabs?.map(({ region, rate }) => ({ region, rate })),
+        top_highlights: product.top_highlights,
+        about_this_item: product.about_this_item,
+        additional_information: product.additional_information,
+        style_details: product.style_details,
+        features_specs: product.features_specs,
+        faqs: product.faqs,
+        display_configs: product.display_configs,
       });
       router.push("/products");
     } catch (err: any) {
@@ -213,6 +221,17 @@ export default function EditProductPage() {
               />
             </CardContent>
           </Card>
+          
+          <ProductDescriptionSections
+            displayConfigs={product.display_configs}
+            topHighlights={product.top_highlights}
+            aboutThisItem={product.about_this_item}
+            additionalInformation={product.additional_information}
+            styleDetails={product.style_details}
+            featuresSpecs={product.features_specs}
+            faqs={product.faqs}
+            onChange={(updatedFields) => setProduct({ ...product, ...updatedFields })}
+          />
 
           <Card>
             <CardHeader><h2 className="text-lg font-semibold">Product Images</h2></CardHeader>
