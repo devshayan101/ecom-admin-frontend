@@ -10,6 +10,7 @@ import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import Modal from "@/components/ui/Modal";
 import { toast } from "sonner";
 import { Save, Plus, Trash2, ArrowUp, ArrowDown, Eye, EyeOff, LayoutTemplate, Layers } from "lucide-react";
+import ImageUpload from "@/components/ImageUpload";
 
 interface HeroSlide {
   id: string;
@@ -18,6 +19,8 @@ interface HeroSlide {
   titleHighlight: string;
   subtitle: string;
   bg: string;
+  largeImage?: string;
+  smallImage?: string;
   badge: string;
   badgeText: string;
   emoji: string;
@@ -34,6 +37,7 @@ interface PromotionCard {
   desc: string;
   btnText: string;
   category: string;
+  image?: string;
   bgClass: string;
   btnClass: string;
   emoji: string;
@@ -514,8 +518,24 @@ export default function ContentSettingsPage() {
                 placeholder="e.g. ✨"
               />
             </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-b border-border py-3 my-2">
+              <ImageUpload
+                label="Large Screen Image (Desktop)"
+                endpoint="/settings/content/upload-url"
+                value={editingSlide.largeImage}
+                onChange={(url) => setEditingSlide({ ...editingSlide, largeImage: url })}
+                onRemove={() => setEditingSlide({ ...editingSlide, largeImage: "" })}
+              />
+              <ImageUpload
+                label="Small Screen Image (Mobile)"
+                endpoint="/settings/content/upload-url"
+                value={editingSlide.smallImage}
+                onChange={(url) => setEditingSlide({ ...editingSlide, smallImage: url })}
+                onRemove={() => setEditingSlide({ ...editingSlide, smallImage: "" })}
+              />
+            </div>
             <Input
-              label="Background CSS Style / Gradient"
+              label="Background CSS Style / Gradient (Fallback if no image)"
               value={editingSlide.bg}
               onChange={(e) => setEditingSlide({ ...editingSlide, bg: e.target.value })}
               placeholder="e.g. linear-gradient(125deg, #0a1828 0%, #0f2444 50%, #1e3a6e 100%)"
@@ -582,6 +602,15 @@ export default function ContentSettingsPage() {
               onChange={(e) => setEditingPromo({ ...editingPromo, desc: e.target.value })}
               placeholder="e.g. Serums, moisturizers, SPF & more"
             />
+            <div className="border-t border-b border-border py-3 my-2">
+              <ImageUpload
+                label="Promotion Card Image"
+                endpoint="/settings/content/upload-url"
+                value={editingPromo.image}
+                onChange={(url) => setEditingPromo({ ...editingPromo, image: url })}
+                onRemove={() => setEditingPromo({ ...editingPromo, image: "" })}
+              />
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <Input
                 label="Button Text"

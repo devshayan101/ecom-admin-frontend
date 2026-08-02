@@ -11,9 +11,10 @@ interface ImageUploadProps {
   onChange: (url: string) => void;
   onRemove: () => void;
   label?: string;
+  endpoint?: string;
 }
 
-export default function ImageUpload({ value, onChange, onRemove, label }: ImageUploadProps) {
+export default function ImageUpload({ value, onChange, onRemove, label, endpoint = "/products/upload-url" }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
 
   const handleUpload = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -23,7 +24,7 @@ export default function ImageUpload({ value, onChange, onRemove, label }: ImageU
     setUploading(true);
     try {
       // 1. Get presigned URL
-      const { uploadUrl, objectUrl } = await apiPost<{ uploadUrl: string; objectUrl: string }>("/products/upload-url", {
+      const { uploadUrl, objectUrl } = await apiPost<{ uploadUrl: string; objectUrl: string }>(endpoint, {
         content_type: file.type,
       });
 
