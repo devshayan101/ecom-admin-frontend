@@ -520,14 +520,14 @@ export default function ContentSettingsPage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-b border-border py-3 my-2">
               <ImageUpload
-                label="Large Screen Image (Desktop)"
+                label="Large Screen Image (Desktop) - Rec: 1920x560 px"
                 endpoint="/settings/content/upload-url"
                 value={editingSlide.largeImage}
                 onChange={(url) => setEditingSlide({ ...editingSlide, largeImage: url })}
                 onRemove={() => setEditingSlide({ ...editingSlide, largeImage: "" })}
               />
               <ImageUpload
-                label="Small Screen Image (Mobile)"
+                label="Small Screen Image (Mobile) - Rec: 768x480 px"
                 endpoint="/settings/content/upload-url"
                 value={editingSlide.smallImage}
                 onChange={(url) => setEditingSlide({ ...editingSlide, smallImage: url })}
@@ -604,7 +604,7 @@ export default function ContentSettingsPage() {
             />
             <div className="border-t border-b border-border py-3 my-2">
               <ImageUpload
-                label="Promotion Card Image"
+                label="Promotion Card Image - Rec: 600x800 px"
                 endpoint="/settings/content/upload-url"
                 value={editingPromo.image}
                 onChange={(url) => setEditingPromo({ ...editingPromo, image: url })}

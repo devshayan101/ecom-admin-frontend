@@ -23,12 +23,28 @@ export default function ImageUpload({ value, onChange, onRemove, label, endpoint
 
     setUploading(true);
     try {
-      // 1. Get presigned URL
-      const { uploadUrl, objectUrl } = await apiPost<{ uploadUrl: string; objectUrl: string }>(endpoint, {
-        content_type: file.type,
-      });
+      let uploadUrl: string;
+      let objectUrl: string;
 
-      // 2. Upload to S3
+      try {
+        const res = await apiPost<{ uploadUrl: string; objectUrl: string }>(endpoint, {
+          content_type: file.type,
+        });
+        uploadUrl = res.uploadUrl;
+        objectUrl = res.objectUrl;
+      } catch (err) {
+        if (endpoint !== "/products/upload-url") {
+          const res = await apiPost<{ uploadUrl: string; objectUrl: string }>("/products/upload-url", {
+            content_type: file.type,
+          });
+          uploadUrl = res.uploadUrl;
+          objectUrl = res.objectUrl;
+        } else {
+          throw err;
+        }
+      }
+
+      // 2. Upload to S3 / Object storage
       await axios.put(uploadUrl, file, {
         headers: {
           "Content-Type": file.type,
@@ -39,7 +55,7 @@ export default function ImageUpload({ value, onChange, onRemove, label, endpoint
       onChange(objectUrl);
     } catch (error) {
       console.error("Upload failed:", error);
-      alert("Failed to upload image. Please try again.");
+      alert("Failed to upload image. Please check backend service or permissions.");
     } finally {
       setUploading(false);
     }
