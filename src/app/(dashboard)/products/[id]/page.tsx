@@ -38,6 +38,8 @@ export default function EditProductPage() {
   const [tagInput, setTagInput] = useState("");
   const [availableRegions, setAvailableRegions] = useState<string[]>([]);
   const [taxRules, setTaxRules] = useState<TaxRule[]>([]);
+  const [variationCategories, setVariationCategories] = useState<string[]>([]);
+  const [varCatInput, setVarCatInput] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -65,6 +67,7 @@ export default function EditProductPage() {
             isCustom: !activeRuleRates.includes(slab.rate)
           }))
         });
+        setVariationCategories(prodData.variation_categories || []);
         setCategories(catData.items || []);
         
         const category = catData.items?.find((c: Category) => c._id === prodData.category_id);
@@ -116,6 +119,7 @@ export default function EditProductPage() {
         features_specs: product.features_specs,
         faqs: product.faqs,
         display_configs: product.display_configs,
+        variation_categories: variationCategories,
       });
       router.push("/products");
     } catch (err: any) {
@@ -152,6 +156,9 @@ export default function EditProductPage() {
     const initialAttrs: Record<string, any> = {};
     categorySchema.forEach(attr => {
       initialAttrs[attr.key] = attr.type === 'boolean' ? false : (attr.type === 'number' ? 0 : "");
+    });
+    variationCategories.forEach(cat => {
+      initialAttrs[cat] = "";
     });
     setProduct({
       ...product,
@@ -257,15 +264,82 @@ export default function EditProductPage() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">Variants</h2>
-                <Button type="button" variant="secondary" size="sm" onClick={addVariant}>
-                  <Plus className="h-4 w-4 mr-2" /> Add Variant
-                </Button>
-              </div>
-            </CardHeader>
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold">Custom Variation Categories</h2>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-end gap-2">
+                  <Input
+                    label="Add Category (e.g. Color, Size)"
+                    value={varCatInput}
+                    onChange={(e) => setVarCatInput(e.target.value)}
+                    placeholder="e.g. Color"
+                  />
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      const trimmed = varCatInput.trim();
+                      if (trimmed && !variationCategories.includes(trimmed)) {
+                        setVariationCategories([...variationCategories, trimmed]);
+                        if (product) {
+                          setProduct({
+                            ...product,
+                            variants: product.variants.map(v => ({
+                              ...v,
+                              attributes: { ...v.attributes, [trimmed]: "" }
+                            }))
+                          });
+                        }
+                        setVarCatInput("");
+                      }
+                    }}
+                  >
+                    Add
+                  </Button>
+                </div>
+                {variationCategories.length > 0 && (
+                  <div className="flex flex-wrap gap-2 pt-2">
+                    {variationCategories.map((cat) => (
+                      <span key={cat} className="inline-flex items-center gap-1 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-xs font-semibold px-2.5 py-1 rounded-md border border-slate-200">
+                        {cat}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setVariationCategories(variationCategories.filter(c => c !== cat));
+                            if (product) {
+                              setProduct({
+                                ...product,
+                                variants: product.variants.map(v => {
+                                  const nextAttrs = { ...v.attributes };
+                                  delete nextAttrs[cat];
+                                  return { ...v, attributes: nextAttrs };
+                                })
+                              });
+                            }
+                          }}
+                          className="text-slate-400 hover:text-red-500 font-bold ml-1"
+                        >
+                          &times;
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold">Variants</h2>
+                  <Button type="button" variant="secondary" size="sm" onClick={addVariant}>
+                    <Plus className="h-4 w-4 mr-2" /> Add Variant
+                  </Button>
+                </div>
+              </CardHeader>
             <CardContent className="space-y-6">
               {product.variants.map((v, i) => (
                 <div key={v._id || i} className="p-4 border border-border rounded-lg space-y-4 relative">
@@ -328,9 +402,9 @@ export default function EditProductPage() {
                     </div>
                   </div>
 
-                  {categorySchema.length > 0 && (
+                  {(categorySchema.length > 0 || variationCategories.length > 0) && (
                     <div className="pt-4 border-t border-gray-100">
-                      <h3 className="text-sm font-medium text-gray-700 mb-3">Attributes</h3>
+                      <h3 className="text-sm font-medium text-gray-700 mb-3">Attributes & Variations</h3>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {categorySchema.map((attr) => (
                           <div key={attr.key}>
@@ -365,6 +439,18 @@ export default function EditProductPage() {
                                 onChange={(e) => updateVariant(i, `attributes.${attr.key}`, attr.type === 'number' ? parseFloat(e.target.value) : e.target.value)}
                               />
                             )}
+                          </div>
+                        ))}
+
+                        {variationCategories.map((cat) => (
+                          <div key={cat}>
+                            <Input
+                              label={cat}
+                              type="text"
+                              value={v.attributes[cat] || ""}
+                              onChange={(e) => updateVariant(i, `attributes.${cat}`, e.target.value)}
+                              placeholder={`Value for ${cat}`}
+                            />
                           </div>
                         ))}
                       </div>

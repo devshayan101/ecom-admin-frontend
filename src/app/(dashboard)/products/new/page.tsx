@@ -30,6 +30,8 @@ export default function NewProductPage() {
   const [images, setImages] = useState<string[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [variationCategories, setVariationCategories] = useState<string[]>([]);
+  const [varCatInput, setVarCatInput] = useState("");
 
   const [topHighlights, setTopHighlights] = useState<any[]>([]);
   const [aboutThisItem, setAboutThisItem] = useState<string[]>([]);
@@ -97,6 +99,9 @@ export default function NewProductPage() {
     categorySchema.forEach(attr => {
       initialAttrs[attr.key] = attr.type === 'boolean' ? false : (attr.type === 'number' ? 0 : "");
     });
+    variationCategories.forEach(cat => {
+      initialAttrs[cat] = "";
+    });
     setVariants([...variants, { sku: "", price: "", stock: "0", low_stock_threshold: "10", attributes: initialAttrs }]);
   };
 
@@ -132,7 +137,7 @@ export default function NewProductPage() {
     setLoading(true);
 
     try {
-      const payload: CreateProductRequest = {
+      const payload: any = {
         name,
         description,
         category_id: categoryId,
@@ -155,6 +160,7 @@ export default function NewProductPage() {
         features_specs: featuresSpecs,
         faqs: faqs,
         display_configs: displayConfigs,
+        variation_categories: variationCategories,
       };
       await apiPost("/products", payload);
       router.push("/products");
@@ -243,6 +249,63 @@ export default function NewProductPage() {
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold">Custom Variation Categories</h2>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-end gap-2">
+                  <Input
+                    label="Add Category (e.g. Color, Size)"
+                    value={varCatInput}
+                    onChange={(e) => setVarCatInput(e.target.value)}
+                    placeholder="e.g. Color"
+                  />
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      const trimmed = varCatInput.trim();
+                      if (trimmed && !variationCategories.includes(trimmed)) {
+                        setVariationCategories([...variationCategories, trimmed]);
+                        setVariants(prev => prev.map(v => ({
+                          ...v,
+                          attributes: { ...v.attributes, [trimmed]: "" }
+                        })));
+                        setVarCatInput("");
+                      }
+                    }}
+                  >
+                    Add
+                  </Button>
+                </div>
+                {variationCategories.length > 0 && (
+                  <div className="flex flex-wrap gap-2 pt-2">
+                    {variationCategories.map((cat) => (
+                      <span key={cat} className="inline-flex items-center gap-1 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-xs font-semibold px-2.5 py-1 rounded-md border border-slate-200">
+                        {cat}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setVariationCategories(variationCategories.filter(c => c !== cat));
+                            setVariants(prev => prev.map(v => {
+                              const nextAttrs = { ...v.attributes };
+                              delete nextAttrs[cat];
+                              return { ...v, attributes: nextAttrs };
+                            }));
+                          }}
+                          className="text-slate-400 hover:text-red-500 font-bold ml-1"
+                        >
+                          &times;
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
                   <h2 className="text-lg font-semibold">Variants</h2>
                   <Button type="button" variant="secondary" size="sm" onClick={addVariant}>
                     <Plus className="h-4 w-4 mr-2" /> Add Variant
@@ -307,9 +370,9 @@ export default function NewProductPage() {
                       </div>
                     </div>
 
-                    {categorySchema.length > 0 && (
+                    {(categorySchema.length > 0 || variationCategories.length > 0) && (
                       <div className="pt-4 border-t border-gray-100">
-                        <h3 className="text-sm font-medium text-gray-700 mb-3">Attributes</h3>
+                        <h3 className="text-sm font-medium text-gray-700 mb-3">Attributes & Variations</h3>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           {categorySchema.map((attr) => (
                             <div key={attr.key}>
@@ -344,6 +407,18 @@ export default function NewProductPage() {
                                   onChange={(e) => updateVariant(i, `attributes.${attr.key}`, attr.type === 'number' ? parseFloat(e.target.value) : e.target.value)}
                                 />
                               )}
+                            </div>
+                          ))}
+
+                          {variationCategories.map((cat) => (
+                            <div key={cat}>
+                              <Input
+                                label={cat}
+                                type="text"
+                                value={v.attributes[cat] || ""}
+                                onChange={(e) => updateVariant(i, `attributes.${cat}`, e.target.value)}
+                                placeholder={`Value for ${cat}`}
+                              />
                             </div>
                           ))}
                         </div>

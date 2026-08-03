@@ -72,6 +72,7 @@ export interface Product {
   features_specs?: ProductKeyValue[];
   faqs?: ProductFaq[];
   display_configs?: ProductDisplayConfig;
+  variation_categories?: string[];
   created_at: string;
   updated_at: string;
   category_name?: string;
@@ -93,6 +94,7 @@ export interface CreateProductRequest {
   features_specs?: ProductKeyValue[];
   faqs?: ProductFaq[];
   display_configs?: ProductDisplayConfig;
+  variation_categories?: string[];
 }
 
 // =========================================
