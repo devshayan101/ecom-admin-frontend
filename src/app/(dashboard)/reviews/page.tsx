@@ -131,6 +131,17 @@ export default function ReviewsPage() {
     }
   };
 
+  const getProductName = (productId: Review["product_id"]) => {
+    if (!productId) return "Unknown Product";
+    if (typeof productId === "object" && "name" in productId) {
+      return productId.name || "Unknown Product";
+    }
+    if (typeof productId === "string") {
+      return productId;
+    }
+    return "Unknown Product";
+  };
+
   // Filter local reviews list in-memory for immediate search matching
   const filteredReviews = reviews.filter((r) => {
     if (!search) return true;
@@ -138,7 +149,7 @@ export default function ReviewsPage() {
     const customerMatch = r.customer_name.toLowerCase().includes(searchClean);
     const commentMatch = r.comment?.toLowerCase().includes(searchClean) || false;
     const titleMatch = r.title?.toLowerCase().includes(searchClean) || false;
-    const productName = (r.product_id && typeof r.product_id === "object") ? r.product_id.name.toLowerCase() : "";
+    const productName = getProductName(r.product_id).toLowerCase();
     return customerMatch || commentMatch || titleMatch || productName.includes(searchClean);
   });
 
@@ -223,7 +234,7 @@ export default function ReviewsPage() {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {filteredReviews.map((review) => {
-                  const productName = (review.product_id && typeof review.product_id === "object") ? (review.product_id as any).name : "Unknown Product";
+                  const productName = getProductName(review.product_id);
                   return (
                     <tr key={review._id} className="hover:bg-slate-50/50 transition-colors">
                       <td className="px-6 py-4 font-bold text-slate-700 max-w-[200px] truncate">
@@ -332,7 +343,7 @@ export default function ReviewsPage() {
             <div className="flex items-start justify-between gap-4 border-b border-slate-100 pb-4">
               <div>
                 <h3 className="font-bold text-slate-800 text-base">
-                  {(selectedReview.product_id && typeof selectedReview.product_id === "object") ? selectedReview.product_id.name : "Product ID: " + (selectedReview.product_id || "N/A")}
+                  {getProductName(selectedReview.product_id)}
                 </h3>
                 <p className="text-xs text-slate-400 font-bold mt-1">
                   Submitted by {selectedReview.customer_name} on {new Date(selectedReview.created_at).toLocaleString()}
