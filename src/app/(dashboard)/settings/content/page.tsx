@@ -574,8 +574,9 @@ export default function ContentSettingsPage() {
             </div>
             <div className="grid grid-cols-5 gap-2 border-t border-b border-border py-3 my-2">
               <div className="flex flex-col items-center">
-                <label className="text-[10px] font-bold text-muted-foreground mb-1">Heading</label>
+                <label htmlFor="slideHeadingColor" className="text-[10px] font-bold text-muted-foreground mb-1">Heading</label>
                 <input
+                  id="slideHeadingColor"
                   type="color"
                   value={editingSlide.titleColor || "#ffffff"}
                   onChange={(e) => setEditingSlide({ ...editingSlide, titleColor: e.target.value })}
@@ -583,8 +584,9 @@ export default function ContentSettingsPage() {
                 />
               </div>
               <div className="flex flex-col items-center">
-                <label className="text-[10px] font-bold text-muted-foreground mb-1">Highlight</label>
+                <label htmlFor="slideHighlightColor" className="text-[10px] font-bold text-muted-foreground mb-1">Highlight</label>
                 <input
+                  id="slideHighlightColor"
                   type="color"
                   value={editingSlide.titleHighlightColor || "#fcd34d"}
                   onChange={(e) => setEditingSlide({ ...editingSlide, titleHighlightColor: e.target.value })}
@@ -592,8 +594,9 @@ export default function ContentSettingsPage() {
                 />
               </div>
               <div className="flex flex-col items-center">
-                <label className="text-[10px] font-bold text-muted-foreground mb-1">Subtitle</label>
+                <label htmlFor="slideSubtitleColor" className="text-[10px] font-bold text-muted-foreground mb-1">Subtitle</label>
                 <input
+                  id="slideSubtitleColor"
                   type="color"
                   value={editingSlide.subtitleColor || "#e2e8f0"}
                   onChange={(e) => setEditingSlide({ ...editingSlide, subtitleColor: e.target.value })}
@@ -601,8 +604,9 @@ export default function ContentSettingsPage() {
                 />
               </div>
               <div className="flex flex-col items-center">
-                <label className="text-[10px] font-bold text-muted-foreground mb-1">Btn Text</label>
+                <label htmlFor="slideBtnTextColor" className="text-[10px] font-bold text-muted-foreground mb-1">Btn Text</label>
                 <input
+                  id="slideBtnTextColor"
                   type="color"
                   value={editingSlide.buttonTextColor || "#000000"}
                   onChange={(e) => setEditingSlide({ ...editingSlide, buttonTextColor: e.target.value })}
@@ -610,8 +614,9 @@ export default function ContentSettingsPage() {
                 />
               </div>
               <div className="flex flex-col items-center">
-                <label className="text-[10px] font-bold text-muted-foreground mb-1">Btn Bg</label>
+                <label htmlFor="slideBtnBgColor" className="text-[10px] font-bold text-muted-foreground mb-1">Btn Bg</label>
                 <input
+                  id="slideBtnBgColor"
                   type="color"
                   value={editingSlide.buttonBgColor || "#ffd814"}
                   onChange={(e) => setEditingSlide({ ...editingSlide, buttonBgColor: e.target.value })}
