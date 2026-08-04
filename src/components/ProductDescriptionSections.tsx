@@ -3,6 +3,7 @@
 import React from 'react';
 import { Card, CardHeader, CardContent } from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
+import Textarea from '@/components/ui/Textarea';
 import Button from '@/components/ui/Button';
 import { Trash2, Plus, HelpCircle } from 'lucide-react';
 import type { ProductKeyValue, ProductFaq, ProductDisplayConfig } from '@/lib/types';
@@ -122,7 +123,7 @@ export default function ProductDescriptionSections({
         </div>
       </CardHeader>
       <CardContent className="space-y-8 pt-6">
-        
+
         {/* Toggle Switches */}
         <div>
           <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-1.5">
@@ -302,7 +303,7 @@ export default function ProductDescriptionSections({
 
         {/* 4. Features & Specs (Key-Value Grid) */}
         {displayConfigs.features_specs && (
-          <div className="space-y-3 bg-muted/10 p-4 rounded-xl border border-[#ff6b00]/30">
+          <div className="space-y-3 bg-muted/10 p-4 rounded-xl border border-border/30">
             <div className="flex justify-between items-center">
               <div>
                 <h5 className="text-sm font-bold text-foreground">Features & Specs</h5>
@@ -410,16 +411,14 @@ export default function ProductDescriptionSections({
                       value={faq.question}
                       onChange={(e) => updateFaqItem(idx, 'question', e.target.value)}
                     />
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-1">Answer</label>
-                      <textarea
-                        className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-foreground placeholder-gray-400 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        placeholder="e.g. Yes, machine wash cold with like colors."
-                        rows={2}
-                        value={faq.answer}
-                        onChange={(e) => updateFaqItem(idx, 'answer', e.target.value)}
-                      />
-                    </div>
+                    <Textarea
+                      id={`faq-answer-${idx}`}
+                      label="Answer"
+                      placeholder="e.g. Yes, machine wash cold with like colors."
+                      rows={2}
+                      value={faq.answer}
+                      onChange={(e) => updateFaqItem(idx, 'answer', e.target.value)}
+                    />
                   </div>
                 ))}
               </div>
