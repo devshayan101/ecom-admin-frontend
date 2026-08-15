@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuthContext } from "@/providers/AuthProvider";
 import { LogOut, User } from "lucide-react";
@@ -12,6 +12,22 @@ interface UserNavProps {
 export default function UserNav({ user }: UserNavProps) {
   const { logout } = useAuthContext();
   const [open, setOpen] = useState(false);
+  const [renderMenu, setRenderMenu] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setRenderMenu(true);
+      setIsClosing(false);
+    } else if (renderMenu) {
+      setIsClosing(true);
+      const timer = setTimeout(() => {
+        setRenderMenu(false);
+        setIsClosing(false);
+      }, 180);
+      return () => clearTimeout(timer);
+    }
+  }, [open]);
 
   return (
     <div className="relative">
@@ -28,10 +44,12 @@ export default function UserNav({ user }: UserNavProps) {
         </div>
       </button>
 
-      {open && (
+      {renderMenu && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 z-20 mt-2 w-48 rounded-md border border-border bg-background shadow-lg animate-in fade-in zoom-in duration-200">
+          <div className={`absolute right-0 z-20 mt-2 w-48 rounded-md border border-border bg-background shadow-lg ${
+            isClosing ? 'animate-dropdown-exit' : 'animate-dropdown-enter'
+          }`}>
             <div className="px-4 py-3 border-b border-border">
               <p className="text-sm font-medium text-foreground">{user?.name}</p>
               <p className="text-xs text-muted-foreground truncate">{user?.email}</p>

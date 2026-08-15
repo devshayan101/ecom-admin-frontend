@@ -164,6 +164,7 @@ export interface Order {
   refund_id?: string;
   cancel_reason?: 'PAYMENT_TIMEOUT' | 'ADMIN_CANCELLED' | 'MANUAL_REMEDIATION' | null;
   shipping_address: Address;
+  billing_address?: Address | null;
   items: OrderItem[];
   total_amount: number;
   currency?: string;

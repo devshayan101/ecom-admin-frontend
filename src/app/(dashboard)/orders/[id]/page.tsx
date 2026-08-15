@@ -246,6 +246,20 @@ export default function OrderDetailPage() {
         </Card>
       )}
 
+      {order.billing_address && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Billing Address</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>{order.billing_address.recipient_name || order.shipping_address?.recipient_name}</p>
+            <p>{order.billing_address.street}</p>
+            <p>{order.billing_address.city}, {order.billing_address.state} {order.billing_address.postcode}</p>
+            <p>{order.billing_address.country}</p>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Process Refund Modal */}
       <Modal
         isOpen={showRefundModal}

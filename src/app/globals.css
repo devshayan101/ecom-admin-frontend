@@ -148,3 +148,21 @@ h1, h2, h3, h4, h5, h6 {
   scrollbar-width: thin;
   scrollbar-color: var(--muted-foreground) transparent;
 }
+
+@keyframes dropdownAppear {
+  from { opacity: 0; transform: translateY(-8px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes dropdownDisappear {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to { opacity: 0; transform: translateY(-8px) scale(0.95); }
+}
+
+.animate-dropdown-enter {
+  animation: dropdownAppear 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-dropdown-exit {
+  animation: dropdownDisappear 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
