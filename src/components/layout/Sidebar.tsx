@@ -40,6 +40,7 @@ const navItems: NavItem[] = [
   { href: "/inventory", label: "Inventory", icon: <Boxes className="h-5 w-5" /> },
   { href: "/orders", label: "Orders", icon: <ShoppingCart className="h-5 w-5" /> },
   { href: "/customers", label: "Customers", icon: <Users className="h-5 w-5" /> },
+  { href: "/coupons", label: "Discounts", icon: <Percent className="h-5 w-5" /> },
   { href: "/reviews", label: "Reviews", icon: <MessageSquare className="h-5 w-5" />, permission: "reviews:read" },
   { href: "/reports", label: "Reports", icon: <BarChart3 className="h-5 w-5" /> },
   { href: "/audit-logs", label: "Audit Logs", icon: <FileText className="h-5 w-5" /> },

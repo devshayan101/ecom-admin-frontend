@@ -18,6 +18,26 @@ export interface AuthPayload {
 }
 
 // =========================================
+// Coupon Types
+// =========================================
+
+export interface Coupon {
+  _id: string;
+  code: string;
+  discount_type: 'PERCENTAGE' | 'FIXED';
+  discount_value: number;
+  min_order_amount: number;
+  max_discount_amount?: number | null;
+  start_date?: string | null;
+  end_date?: string | null;
+  usage_limit?: number | null;
+  used_count: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+// =========================================
 // Product Types
 // =========================================
 
