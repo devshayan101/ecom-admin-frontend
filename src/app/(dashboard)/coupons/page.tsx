@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { apiGet, apiPost, apiPut, apiDelete, getApiError } from "@/lib/api-client";
 import type { Coupon } from "@/lib/types";
 import { Card } from "@/components/ui/Card";
@@ -17,6 +17,7 @@ export default function CouponsPage() {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const requestCountRef = useRef(0);
 
   // Modal State
   const [modalOpen, setModalOpen] = useState(false);
@@ -37,16 +38,23 @@ export default function CouponsPage() {
   });
 
   const fetchCoupons = async () => {
+    const requestId = ++requestCountRef.current;
     setLoading(true);
     try {
       const queryParams = new URLSearchParams();
       if (search) queryParams.append("search", search);
       const res = await apiGet<{ items: Coupon[] }>(`/coupons?${queryParams.toString()}`);
-      setCoupons(res.items || []);
+      if (requestId === requestCountRef.current) {
+        setCoupons(res.items || []);
+      }
     } catch (err) {
-      toast.error(getApiError(err));
+      if (requestId === requestCountRef.current) {
+        toast.error(getApiError(err));
+      }
     } finally {
-      setLoading(false);
+      if (requestId === requestCountRef.current) {
+        setLoading(false);
+      }
     }
   };
 
