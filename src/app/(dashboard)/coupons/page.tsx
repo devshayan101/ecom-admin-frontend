@@ -69,11 +69,11 @@ export default function CouponsPage() {
         code: coupon.code,
         discount_type: coupon.discount_type,
         discount_value: String(coupon.discount_value),
-        min_order_amount: String(coupon.min_order_amount || 0),
-        max_discount_amount: coupon.max_discount_amount ? String(coupon.max_discount_amount) : "",
+        min_order_amount: coupon.min_order_amount != null ? String(coupon.min_order_amount) : "0",
+        max_discount_amount: coupon.max_discount_amount != null ? String(coupon.max_discount_amount) : "",
         start_date: coupon.start_date ? new Date(coupon.start_date).toISOString().slice(0, 16) : "",
         end_date: coupon.end_date ? new Date(coupon.end_date).toISOString().slice(0, 16) : "",
-        usage_limit: coupon.usage_limit ? String(coupon.usage_limit) : "",
+        usage_limit: coupon.usage_limit != null ? String(coupon.usage_limit) : "",
         is_active: coupon.is_active,
       });
     } else {
@@ -110,11 +110,11 @@ export default function CouponsPage() {
         code: formData.code.trim().toUpperCase(),
         discount_type: formData.discount_type,
         discount_value: Number(formData.discount_value),
-        min_order_amount: Number(formData.min_order_amount) || 0,
-        max_discount_amount: formData.max_discount_amount ? Number(formData.max_discount_amount) : null,
+        min_order_amount: formData.min_order_amount.trim() !== "" ? Number(formData.min_order_amount) : 0,
+        max_discount_amount: formData.max_discount_amount.trim() !== "" ? Number(formData.max_discount_amount) : null,
         start_date: formData.start_date ? new Date(formData.start_date).toISOString() : null,
         end_date: formData.end_date ? new Date(formData.end_date).toISOString() : null,
-        usage_limit: formData.usage_limit ? Number(formData.usage_limit) : null,
+        usage_limit: formData.usage_limit.trim() !== "" ? Number(formData.usage_limit) : null,
         is_active: formData.is_active,
       };
 
@@ -139,7 +139,7 @@ export default function CouponsPage() {
     if (!confirm("Are you sure you want to delete this coupon?")) return;
     try {
       await apiDelete(`/coupons/${id}`);
-      toast.success("Coupon deleted successfully");
+      toast.success("Coupon deleted");
       fetchCoupons();
     } catch (err) {
       toast.error(getApiError(err));
@@ -149,7 +149,7 @@ export default function CouponsPage() {
   const handleToggleActive = async (coupon: Coupon) => {
     try {
       await apiPut(`/coupons/${coupon._id}`, { is_active: !coupon.is_active });
-      toast.success(`Coupon ${!coupon.is_active ? "activated" : "deactivated"}`);
+      toast.success(`Coupon marked as ${!coupon.is_active ? "active" : "inactive"}`);
       fetchCoupons();
     } catch (err) {
       toast.error(getApiError(err));
@@ -160,34 +160,38 @@ export default function CouponsPage() {
     {
       key: "code",
       title: "Code",
-      render: (c: Coupon) => <span className="font-mono font-bold text-foreground">{c.code}</span>,
+      render: (c: Coupon) => (
+        <div className="flex items-center gap-2">
+          <span className="font-mono font-bold text-primary tracking-wide">{c.code}</span>
+        </div>
+      ),
     },
     {
       key: "discount",
       title: "Discount",
-      render: (c: Coupon) =>
-        c.discount_type === "PERCENTAGE" ? (
-          <span className="inline-flex items-center gap-1 font-semibold text-emerald-600 dark:text-emerald-400">
-            <Percent className="h-3.5 w-3.5" /> {c.discount_value}% OFF
-            {c.max_discount_amount ? ` (Max $${c.max_discount_amount})` : ""}
-          </span>
-        ) : (
-          <span className="inline-flex items-center gap-1 font-semibold text-blue-600 dark:text-blue-400">
-            <DollarSign className="h-3.5 w-3.5" /> ${c.discount_value} OFF
-          </span>
-        ),
+      render: (c: Coupon) => (
+        <span className="font-semibold text-foreground">
+          {c.discount_type === "PERCENTAGE" ? (
+            <span className="flex items-center gap-1">
+              {c.discount_value}% {c.max_discount_amount != null && <span className="text-xs text-muted-foreground font-normal">(Max ${c.max_discount_amount})</span>}
+            </span>
+          ) : (
+            `$${c.discount_value}`
+          )}
+        </span>
+      ),
     },
     {
       key: "min_order_amount",
       title: "Min. Order",
-      render: (c: Coupon) => <span className="font-medium text-muted-foreground">${c.min_order_amount || 0}</span>,
+      render: (c: Coupon) => <span className="font-medium text-muted-foreground">${c.min_order_amount ?? 0}</span>,
     },
     {
       key: "usage",
       title: "Usage",
       render: (c: Coupon) => (
         <span className="text-muted-foreground">
-          {c.used_count} {c.usage_limit ? `/ ${c.usage_limit}` : "uses"}
+          {c.used_count} {c.usage_limit != null ? `/ ${c.usage_limit}` : "uses"}
         </span>
       ),
     },
