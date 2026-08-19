@@ -62,6 +62,19 @@ export default function CouponsPage() {
     fetchCoupons();
   }, []);
 
+  const toLocalDatetimeLocal = (dateString?: string | Date | null) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "";
+    const pad = (n: number) => n.toString().padStart(2, "0");
+    const year = date.getFullYear();
+    const month = pad(date.getMonth() + 1);
+    const day = pad(date.getDate());
+    const hours = pad(date.getHours());
+    const minutes = pad(date.getMinutes());
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
   const handleOpenModal = (coupon?: Coupon) => {
     if (coupon) {
       setEditingCoupon(coupon);
@@ -71,8 +84,8 @@ export default function CouponsPage() {
         discount_value: String(coupon.discount_value),
         min_order_amount: coupon.min_order_amount != null ? String(coupon.min_order_amount) : "0",
         max_discount_amount: coupon.max_discount_amount != null ? String(coupon.max_discount_amount) : "",
-        start_date: coupon.start_date ? new Date(coupon.start_date).toISOString().slice(0, 16) : "",
-        end_date: coupon.end_date ? new Date(coupon.end_date).toISOString().slice(0, 16) : "",
+        start_date: toLocalDatetimeLocal(coupon.start_date),
+        end_date: toLocalDatetimeLocal(coupon.end_date),
         usage_limit: coupon.usage_limit != null ? String(coupon.usage_limit) : "",
         is_active: coupon.is_active,
       });
@@ -99,9 +112,47 @@ export default function CouponsPage() {
       toast.error("Coupon code is required");
       return;
     }
-    if (!formData.discount_value || Number(formData.discount_value) <= 0) {
+
+    const discountVal = Number(formData.discount_value);
+    if (isNaN(discountVal) || discountVal <= 0) {
       toast.error("Valid discount value is required");
       return;
+    }
+
+    if (formData.discount_type === "PERCENTAGE" && discountVal > 100) {
+      toast.error("Percentage discount cannot exceed 100%");
+      return;
+    }
+
+    if (formData.min_order_amount.trim() !== "") {
+      const minOrder = Number(formData.min_order_amount);
+      if (isNaN(minOrder) || minOrder < 0) {
+        toast.error("Minimum order amount cannot be negative");
+        return;
+      }
+    }
+
+    if (formData.max_discount_amount.trim() !== "") {
+      const maxDiscount = Number(formData.max_discount_amount);
+      if (isNaN(maxDiscount) || maxDiscount < 0) {
+        toast.error("Max discount amount cannot be negative");
+        return;
+      }
+    }
+
+    if (formData.usage_limit.trim() !== "") {
+      const limit = Number(formData.usage_limit);
+      if (isNaN(limit) || limit < 1) {
+        toast.error("Usage limit must be a positive integer");
+        return;
+      }
+    }
+
+    if (formData.start_date && formData.end_date) {
+      if (new Date(formData.end_date) <= new Date(formData.start_date)) {
+        toast.error("End date must be after start date");
+        return;
+      }
     }
 
     setSubmitting(true);
