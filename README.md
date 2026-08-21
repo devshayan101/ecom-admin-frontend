@@ -13,6 +13,7 @@ A modern, high-performance, and feature-rich E-commerce Admin Dashboard built wi
 - **🔐 Advanced RBAC**: Role-based access control for managing admin users and permissions.
 - **📜 Audit Logs**: Comprehensive logging of all administrative actions for security and transparency.
 - **🌓 Dark Mode**: Premium dark and light mode support with semantic theming.
+- **🎬 Homepage & Product Shorts Management**: Admin management for Hero banners, Promotion cards, and vertical Product Shorts with CloudFront video/image uploads, product linking, active toggles, and reordering.
 - **📱 Responsive Design**: Fully optimized for desktop and mobile viewports.
 - **⚡ Performance**: Built with Next.js 16 App Router and Turbopack for lightning-fast development and runtime performance.
 

@@ -41,11 +41,19 @@ export default function MediaUpload({
         uploadUrl = res.uploadUrl;
         objectUrl = res.objectUrl;
       } catch (err) {
-        const res = await apiPost<{ uploadUrl: string; objectUrl: string }>("/products/upload-url", {
-          content_type: file.type,
-        });
-        uploadUrl = res.uploadUrl;
-        objectUrl = res.objectUrl;
+        try {
+          const res = await apiPost<{ uploadUrl: string; objectUrl: string }>("/products/upload-url", {
+            content_type: file.type,
+          });
+          uploadUrl = res.uploadUrl;
+          objectUrl = res.objectUrl;
+        } catch (err2) {
+          const res = await apiPost<{ uploadUrl: string; objectUrl: string }>("/settings/upload-url", {
+            content_type: file.type,
+          });
+          uploadUrl = res.uploadUrl;
+          objectUrl = res.objectUrl;
+        }
       }
 
       // Upload to S3 / Object storage

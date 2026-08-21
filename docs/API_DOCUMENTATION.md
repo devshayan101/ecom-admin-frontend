@@ -65,10 +65,12 @@ interface Product {
 -   `GET /categories/:id`: Get category details and custom attributes.
 
 ### Settings
--   `GET /settings`: Get system settings configuration (general, taxes, shipping, reviews).
+-   `GET /settings`: Get system settings configuration (general, taxes, shipping, reviews, homepage content).
 -   `PUT /settings/general`: Save general store info and country/state definitions.
 -   `PUT /settings/taxes`: Update tax rule definitions and GST/VAT settings.
 -   `PUT /settings/shipping`: Configure shipping zones, custom rate rules (with delivery time), and carrier plugins.
+-   `PUT /settings/content`: Update Hero slides, Promotion grid cards, and Product Shorts (`productVideos`).
+-   `POST /settings/content/upload-url`: Generate presigned S3/CloudFront upload URLs for images and short videos.
 
 ## ⚠️ Error Handling
 
