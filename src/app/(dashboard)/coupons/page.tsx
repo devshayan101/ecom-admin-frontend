@@ -64,7 +64,7 @@ export default function CouponsPage() {
 
   const toLocalDatetimeLocal = (dateString?: string | Date | null) => {
     if (!dateString) return "";
-    const date = new Date(dateString);
+    const date = dateString instanceof Date ? dateString : new Date(dateString);
     if (isNaN(date.getTime())) return "";
     const pad = (n: number) => n.toString().padStart(2, "0");
     const year = date.getFullYear();
@@ -114,7 +114,7 @@ export default function CouponsPage() {
     }
 
     const discountVal = Number(formData.discount_value);
-    if (isNaN(discountVal) || discountVal <= 0) {
+    if (!Number.isFinite(discountVal) || discountVal <= 0) {
       toast.error("Valid discount value is required");
       return;
     }
@@ -126,7 +126,7 @@ export default function CouponsPage() {
 
     if (formData.min_order_amount.trim() !== "") {
       const minOrder = Number(formData.min_order_amount);
-      if (isNaN(minOrder) || minOrder < 0) {
+      if (!Number.isFinite(minOrder) || minOrder < 0) {
         toast.error("Minimum order amount cannot be negative");
         return;
       }
@@ -134,7 +134,7 @@ export default function CouponsPage() {
 
     if (formData.max_discount_amount.trim() !== "") {
       const maxDiscount = Number(formData.max_discount_amount);
-      if (isNaN(maxDiscount) || maxDiscount < 0) {
+      if (!Number.isFinite(maxDiscount) || maxDiscount < 0) {
         toast.error("Max discount amount cannot be negative");
         return;
       }
@@ -142,7 +142,7 @@ export default function CouponsPage() {
 
     if (formData.usage_limit.trim() !== "") {
       const limit = Number(formData.usage_limit);
-      if (isNaN(limit) || limit < 1) {
+      if (!Number.isFinite(limit) || !Number.isInteger(limit) || limit < 1) {
         toast.error("Usage limit must be a positive integer");
         return;
       }
