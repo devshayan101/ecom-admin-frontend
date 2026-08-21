@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { apiGet, apiPut, getApiError } from "@/lib/api-client";
 import { useAuthContext } from "@/providers/AuthProvider";
 import { Card } from "@/components/ui/Card";
@@ -9,8 +10,9 @@ import Button from "@/components/ui/Button";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import Modal from "@/components/ui/Modal";
 import { toast } from "sonner";
-import { Save, Plus, Trash2, ArrowUp, ArrowDown, Eye, EyeOff, LayoutTemplate, Layers } from "lucide-react";
+import { Save, Plus, Trash2, ArrowUp, ArrowDown, Eye, EyeOff, LayoutTemplate, Layers, Video, Play, Sparkles } from "lucide-react";
 import ImageUpload from "@/components/ImageUpload";
+import MediaUpload from "@/components/MediaUpload";
 
 interface HeroSlide {
   id: string;
@@ -54,16 +56,42 @@ interface PromotionCard {
   btnBgColor?: string;
 }
 
+interface ProductVideo {
+  id: string;
+  title: string;
+  category: string;
+  videoUrl: string;
+  thumbnail: string;
+  views?: string;
+  likes?: number;
+  duration?: string;
+  productId?: string;
+  active: boolean;
+  sortOrder: number;
+}
+
 export default function ContentSettingsPage() {
   const { role } = useAuthContext();
   const isReadOnly = role === "viewer";
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab");
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<"slides" | "promos">("slides");
+  const [activeTab, setActiveTab] = useState<"slides" | "promos" | "shorts">("slides");
+
+  useEffect(() => {
+    if (tabParam === "shorts") {
+      setActiveTab("shorts");
+    } else if (tabParam === "promos") {
+      setActiveTab("promos");
+    }
+  }, [tabParam]);
 
   const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([]);
   const [promotionCards, setPromotionCards] = useState<PromotionCard[]>([]);
+  const [productVideos, setProductVideos] = useState<ProductVideo[]>([]);
+  const [productsList, setProductsList] = useState<{ _id: string; name: string }[]>([]);
 
   // Modal State for Slide Editing/Creation
   const [editingSlide, setEditingSlide] = useState<HeroSlide | null>(null);
@@ -73,6 +101,10 @@ export default function ContentSettingsPage() {
   const [editingPromo, setEditingPromo] = useState<PromotionCard | null>(null);
   const [isPromoModalOpen, setIsPromoModalOpen] = useState(false);
 
+  // Modal State for Video Shorts Editing/Creation
+  const [editingVideo, setEditingVideo] = useState<ProductVideo | null>(null);
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+
   const fetchSettings = async () => {
     try {
       setLoading(true);
@@ -80,6 +112,17 @@ export default function ContentSettingsPage() {
       if (res?.content) {
         setHeroSlides(res.content.heroSlides || []);
         setPromotionCards(res.content.promotionCards || []);
+        setProductVideos(res.content.productVideos || []);
+      }
+      
+      // Fetch products for linking
+      try {
+        const prodRes = await apiGet<any>("/products?limit=100");
+        if (prodRes?.products) {
+          setProductsList(prodRes.products.map((p: any) => ({ _id: p._id, name: p.name })));
+        }
+      } catch (err) {
+        // Silently catch if products fail
       }
     } catch (err) {
       toast.error(getApiError(err));
@@ -99,6 +142,7 @@ export default function ContentSettingsPage() {
       const payload = {
         heroSlides: heroSlides.map((s, idx) => ({ ...s, sortOrder: idx })),
         promotionCards: promotionCards.map((p, idx) => ({ ...p, sortOrder: idx })),
+        productVideos: productVideos.map((v, idx) => ({ ...v, sortOrder: idx })),
       };
       try {
         await apiPut("/settings/content", payload);
@@ -249,6 +293,66 @@ export default function ContentSettingsPage() {
     setPromotionCards(updated);
   };
 
+  // --- Product Videos / Shorts Actions ---
+  const handleOpenVideoModal = (video?: ProductVideo) => {
+    if (video) {
+      setEditingVideo({ ...video });
+    } else {
+      setEditingVideo({
+        id: `vid-${Date.now()}`,
+        title: "Product Feature Showcase",
+        category: "skincare",
+        videoUrl: "",
+        thumbnail: "",
+        views: "1.5K",
+        likes: 150,
+        duration: "0:15",
+        productId: productsList[0]?._id || "",
+        active: true,
+        sortOrder: productVideos.length,
+      });
+    }
+    setIsVideoModalOpen(true);
+  };
+
+  const handleSaveVideoModal = () => {
+    if (!editingVideo) return;
+    if (!editingVideo.title || !editingVideo.videoUrl || !editingVideo.thumbnail || !editingVideo.category) {
+      toast.error("Please provide title, category, video, and thumbnail.");
+      return;
+    }
+
+    setProductVideos((prev) => {
+      const exists = prev.some((v) => v.id === editingVideo.id);
+      if (exists) {
+        return prev.map((v) => (v.id === editingVideo.id ? editingVideo : v));
+      }
+      return [...prev, editingVideo];
+    });
+
+    setIsVideoModalOpen(false);
+    setEditingVideo(null);
+  };
+
+  const handleDeleteVideo = (id: string) => {
+    setProductVideos((prev) => prev.filter((v) => v.id !== id));
+  };
+
+  const handleToggleVideoActive = (id: string) => {
+    setProductVideos((prev) =>
+      prev.map((v) => (v.id === id ? { ...v, active: !v.active } : v))
+    );
+  };
+
+  const handleMoveVideo = (index: number, direction: "up" | "down") => {
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= productVideos.length) return;
+    const updated = [...productVideos];
+    const [moved] = updated.splice(index, 1);
+    updated.splice(targetIndex, 0, moved);
+    setProductVideos(updated);
+  };
+
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -264,7 +368,7 @@ export default function ContentSettingsPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Homepage Content</h1>
           <p className="text-sm text-muted-foreground">
-            Manage the hero banner slides and promotion grid cards displayed on your storefront homepage.
+            Manage hero banners, promotion cards, and trending product video shorts displayed on storefront.
           </p>
         </div>
         {!isReadOnly && (
@@ -298,6 +402,17 @@ export default function ContentSettingsPage() {
         >
           <Layers className="h-4 w-4" />
           Promotion Cards ({promotionCards.length})
+        </button>
+        <button
+          onClick={() => setActiveTab("shorts")}
+          className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold border-b-2 transition-colors cursor-pointer ${
+            activeTab === "shorts"
+              ? "border-primary text-primary"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Video className="h-4 w-4" />
+          Product Shorts ({productVideos.length})
         </button>
       </div>
 
@@ -482,6 +597,134 @@ export default function ContentSettingsPage() {
         </Card>
       )}
 
+      {/* Product Video Shorts Tab */}
+      {activeTab === "shorts" && (
+        <Card className="p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-bold flex items-center gap-2">
+                Trending Product Shorts
+                <Sparkles className="w-4 h-4 text-amber-500" />
+              </h2>
+              <p className="text-xs text-muted-foreground">
+                Manage vertical product video reels, thumbnail images, and linked shop products.
+              </p>
+            </div>
+            {!isReadOnly && (
+              <Button onClick={() => handleOpenVideoModal()} variant="secondary" className="flex items-center gap-1.5">
+                <Plus className="h-4 w-4" /> Add Video Short
+              </Button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {productVideos.map((vid, idx) => (
+              <div
+                key={vid.id}
+                className={`bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-lg relative flex flex-col justify-between ${
+                  !vid.active ? "opacity-40 border-2 border-dashed border-red-500" : ""
+                }`}
+              >
+                {/* Thumbnail / Video Preview Header */}
+                <div className="relative aspect-[16/9] bg-black overflow-hidden flex items-center justify-center">
+                  <img
+                    src={vid.thumbnail || "https://images.unsplash.com/photo-1608248597481-496100c80836?q=80&w=600&auto=format&fit=crop"}
+                    alt={vid.title}
+                    className="w-full h-full object-cover opacity-75"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/30">
+                      <Play className="w-5 h-5 fill-current ml-0.5" />
+                    </div>
+                  </div>
+                  <span className="absolute top-2 left-2 bg-black/60 backdrop-blur-md text-[10px] text-white px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                    {vid.category}
+                  </span>
+                  {vid.duration && (
+                    <span className="absolute bottom-2 right-2 bg-black/80 text-[10px] text-slate-300 px-1.5 py-0.5 rounded font-mono">
+                      {vid.duration}
+                    </span>
+                  )}
+                </div>
+
+                {/* Body Content */}
+                <div className="p-4 space-y-2 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-sm font-bold text-white line-clamp-2 leading-tight">{vid.title}</h3>
+                    <div className="flex items-center gap-3 mt-2 text-[11px] text-slate-400">
+                      <span>👁️ {vid.views || "1K"} views</span>
+                      <span>❤️ {vid.likes || 0} likes</span>
+                    </div>
+                  </div>
+
+                  {vid.productId && (
+                    <div className="bg-slate-800/80 p-2 rounded-lg text-[11px] text-slate-300 flex items-center justify-between border border-slate-700">
+                      <span className="truncate">Linked Product:</span>
+                      <span className="font-semibold text-blue-400 truncate max-w-[120px]">
+                        {productsList.find((p) => p._id === vid.productId)?.name || vid.productId}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Actions Footer */}
+                  <div className="pt-3 flex items-center justify-between border-t border-slate-800 mt-2">
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => handleMoveVideo(idx, "up")}
+                        disabled={idx === 0 || isReadOnly}
+                        className="p-1 hover:bg-slate-800 text-slate-300 rounded disabled:opacity-30 cursor-pointer"
+                        title="Move Left/Up"
+                      >
+                        <ArrowUp className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => handleMoveVideo(idx, "down")}
+                        disabled={idx === productVideos.length - 1 || isReadOnly}
+                        className="p-1 hover:bg-slate-800 text-slate-300 rounded disabled:opacity-30 cursor-pointer"
+                        title="Move Right/Down"
+                      >
+                        <ArrowDown className="h-4 w-4" />
+                      </button>
+                    </div>
+
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => handleToggleVideoActive(vid.id)}
+                        disabled={isReadOnly}
+                        className="p-1 hover:bg-slate-800 rounded cursor-pointer"
+                        title={vid.active ? "Deactivate" : "Activate"}
+                      >
+                        {vid.active ? <Eye className="h-4 w-4 text-emerald-400" /> : <EyeOff className="h-4 w-4 text-red-400" />}
+                      </button>
+                      <button
+                        onClick={() => handleOpenVideoModal(vid)}
+                        disabled={isReadOnly}
+                        className="px-2.5 py-1 text-xs bg-slate-800 hover:bg-slate-700 text-white rounded font-bold cursor-pointer"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteVideo(vid.id)}
+                        disabled={isReadOnly}
+                        className="p-1 hover:bg-red-500/30 rounded text-red-400 cursor-pointer"
+                        title="Delete Short"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+            {productVideos.length === 0 && (
+              <div className="col-span-full text-center py-12 text-sm text-muted-foreground border border-dashed border-border rounded-xl">
+                No product videos added yet. Click "Add Video Short" to get started.
+              </div>
+            )}
+          </div>
+        </Card>
+      )}
+
       {/* Slide Modal */}
       {isSlideModalOpen && editingSlide && (
         <Modal
@@ -572,58 +815,6 @@ export default function ContentSettingsPage() {
                 placeholder="e.g. skincare"
               />
             </div>
-            <div className="grid grid-cols-5 gap-2 border-t border-b border-border py-3 my-2">
-              <div className="flex flex-col items-center">
-                <label htmlFor="slideHeadingColor" className="text-[10px] font-bold text-muted-foreground mb-1">Heading</label>
-                <input
-                  id="slideHeadingColor"
-                  type="color"
-                  value={editingSlide.titleColor || "#ffffff"}
-                  onChange={(e) => setEditingSlide({ ...editingSlide, titleColor: e.target.value })}
-                  className="w-10 h-10 border border-border rounded cursor-pointer"
-                />
-              </div>
-              <div className="flex flex-col items-center">
-                <label htmlFor="slideHighlightColor" className="text-[10px] font-bold text-muted-foreground mb-1">Highlight</label>
-                <input
-                  id="slideHighlightColor"
-                  type="color"
-                  value={editingSlide.titleHighlightColor || "#fcd34d"}
-                  onChange={(e) => setEditingSlide({ ...editingSlide, titleHighlightColor: e.target.value })}
-                  className="w-10 h-10 border border-border rounded cursor-pointer"
-                />
-              </div>
-              <div className="flex flex-col items-center">
-                <label htmlFor="slideSubtitleColor" className="text-[10px] font-bold text-muted-foreground mb-1">Subtitle</label>
-                <input
-                  id="slideSubtitleColor"
-                  type="color"
-                  value={editingSlide.subtitleColor || "#e2e8f0"}
-                  onChange={(e) => setEditingSlide({ ...editingSlide, subtitleColor: e.target.value })}
-                  className="w-10 h-10 border border-border rounded cursor-pointer"
-                />
-              </div>
-              <div className="flex flex-col items-center">
-                <label htmlFor="slideBtnTextColor" className="text-[10px] font-bold text-muted-foreground mb-1">Btn Text</label>
-                <input
-                  id="slideBtnTextColor"
-                  type="color"
-                  value={editingSlide.buttonTextColor || "#000000"}
-                  onChange={(e) => setEditingSlide({ ...editingSlide, buttonTextColor: e.target.value })}
-                  className="w-10 h-10 border border-border rounded cursor-pointer"
-                />
-              </div>
-              <div className="flex flex-col items-center">
-                <label htmlFor="slideBtnBgColor" className="text-[10px] font-bold text-muted-foreground mb-1">Btn Bg</label>
-                <input
-                  id="slideBtnBgColor"
-                  type="color"
-                  value={editingSlide.buttonBgColor || "#ffd814"}
-                  onChange={(e) => setEditingSlide({ ...editingSlide, buttonBgColor: e.target.value })}
-                  className="w-10 h-10 border border-border rounded cursor-pointer"
-                />
-              </div>
-            </div>
             <div className="flex items-center gap-2 pt-2">
               <input
                 type="checkbox"
@@ -695,58 +886,6 @@ export default function ContentSettingsPage() {
                 placeholder="e.g. skincare"
               />
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <Input
-                label="Background Tailwind / CSS Class"
-                value={editingPromo.bgClass}
-                onChange={(e) => setEditingPromo({ ...editingPromo, bgClass: e.target.value })}
-                placeholder="e.g. bg-gradient-to-br from-[#0c4a30] via-[#0f5c3c] to-[#062e1e]"
-              />
-              <Input
-                label="Emoji Icon"
-                value={editingPromo.emoji}
-                onChange={(e) => setEditingPromo({ ...editingPromo, emoji: e.target.value })}
-                placeholder="e.g. 🌿"
-              />
-            </div>
-            <div className="grid grid-cols-4 gap-2 border-t border-b border-border py-3 my-2">
-              <div className="flex flex-col items-center">
-                <label className="text-[10px] font-bold text-muted-foreground mb-1">Heading</label>
-                <input
-                  type="color"
-                  value={editingPromo.titleColor || "#ffffff"}
-                  onChange={(e) => setEditingPromo({ ...editingPromo, titleColor: e.target.value })}
-                  className="w-10 h-10 border border-border rounded cursor-pointer"
-                />
-              </div>
-              <div className="flex flex-col items-center">
-                <label className="text-[10px] font-bold text-muted-foreground mb-1">Description</label>
-                <input
-                  type="color"
-                  value={editingPromo.descColor || "#e2e8f0"}
-                  onChange={(e) => setEditingPromo({ ...editingPromo, descColor: e.target.value })}
-                  className="w-10 h-10 border border-border rounded cursor-pointer"
-                />
-              </div>
-              <div className="flex flex-col items-center">
-                <label className="text-[10px] font-bold text-muted-foreground mb-1">Btn Text</label>
-                <input
-                  type="color"
-                  value={editingPromo.btnTextColor || "#ffffff"}
-                  onChange={(e) => setEditingPromo({ ...editingPromo, btnTextColor: e.target.value })}
-                  className="w-10 h-10 border border-border rounded cursor-pointer"
-                />
-              </div>
-              <div className="flex flex-col items-center">
-                <label className="text-[10px] font-bold text-muted-foreground mb-1">Btn Background</label>
-                <input
-                  type="color"
-                  value={editingPromo.btnBgColor || "#0058be"}
-                  onChange={(e) => setEditingPromo({ ...editingPromo, btnBgColor: e.target.value })}
-                  className="w-10 h-10 border border-border rounded cursor-pointer"
-                />
-              </div>
-            </div>
             <div className="flex items-center gap-2 pt-2">
               <input
                 type="checkbox"
@@ -764,6 +903,126 @@ export default function ContentSettingsPage() {
                 Cancel
               </Button>
               <Button onClick={handleSavePromoModal}>Save Card</Button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* Video Short Modal */}
+      {isVideoModalOpen && editingVideo && (
+        <Modal
+          isOpen={isVideoModalOpen}
+          onClose={() => setIsVideoModalOpen(false)}
+          title={editingVideo.id ? "Edit Product Video Short" : "Add Product Video Short"}
+        >
+          <div className="space-y-4 max-h-[75vh] overflow-y-auto pr-1">
+            <Input
+              label="Video Title"
+              value={editingVideo.title}
+              onChange={(e) => setEditingVideo({ ...editingVideo, title: e.target.value })}
+              placeholder="e.g. Vitamin C Serum Daily Glow Routine"
+            />
+
+            <div className="grid grid-cols-2 gap-3">
+              <Input
+                label="Category Slug"
+                value={editingVideo.category}
+                onChange={(e) => setEditingVideo({ ...editingVideo, category: e.target.value })}
+                placeholder="e.g. skincare, cosmetics, women"
+              />
+              <div className="flex flex-col gap-1">
+                <label className="block text-sm font-medium text-foreground">Linked Product</label>
+                <select
+                  value={editingVideo.productId || ""}
+                  onChange={(e) => setEditingVideo({ ...editingVideo, productId: e.target.value })}
+                  className="w-full h-10 px-3 border border-border rounded-md bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="">-- Select Linked Product --</option>
+                  {productsList.map((p) => (
+                    <option key={p._id} value={p._id}>
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Video File Upload (CloudFront) */}
+            <div className="space-y-2 border-t border-b border-border py-3">
+              <MediaUpload
+                label="Short Video File (MP4/WebM) - Upload to CloudFront"
+                mediaType="video"
+                endpoint="/settings/content/upload-url"
+                value={editingVideo.videoUrl}
+                onChange={(url) => setEditingVideo({ ...editingVideo, videoUrl: url })}
+                onRemove={() => setEditingVideo({ ...editingVideo, videoUrl: "" })}
+              />
+              <Input
+                label="Or Direct Video URL (MP4)"
+                value={editingVideo.videoUrl}
+                onChange={(e) => setEditingVideo({ ...editingVideo, videoUrl: e.target.value })}
+                placeholder="https://cloudfront.net/my-video.mp4"
+              />
+            </div>
+
+            {/* Thumbnail Poster Image (CloudFront) */}
+            <div className="space-y-2 border-b border-border pb-3">
+              <MediaUpload
+                label="Poster Thumbnail Image - Upload to CloudFront"
+                mediaType="image"
+                endpoint="/settings/content/upload-url"
+                value={editingVideo.thumbnail}
+                onChange={(url) => setEditingVideo({ ...editingVideo, thumbnail: url })}
+                onRemove={() => setEditingVideo({ ...editingVideo, thumbnail: "" })}
+              />
+              <Input
+                label="Or Direct Thumbnail Image URL"
+                value={editingVideo.thumbnail}
+                onChange={(e) => setEditingVideo({ ...editingVideo, thumbnail: e.target.value })}
+                placeholder="https://images.unsplash.com/..."
+              />
+            </div>
+
+            <div className="grid grid-cols-3 gap-3">
+              <Input
+                label="Views Tag"
+                value={editingVideo.views || ""}
+                onChange={(e) => setEditingVideo({ ...editingVideo, views: e.target.value })}
+                placeholder="e.g. 12.4K"
+              />
+              <Input
+                label="Initial Likes"
+                type="number"
+                value={editingVideo.likes || 0}
+                onChange={(e) => setEditingVideo({ ...editingVideo, likes: Number(e.target.value) })}
+                placeholder="843"
+              />
+              <Input
+                label="Duration"
+                value={editingVideo.duration || ""}
+                onChange={(e) => setEditingVideo({ ...editingVideo, duration: e.target.value })}
+                placeholder="0:15"
+              />
+            </div>
+
+            <div className="flex items-center gap-2 pt-2">
+              <input
+                type="checkbox"
+                id="videoActive"
+                checked={editingVideo.active}
+                onChange={(e) => setEditingVideo({ ...editingVideo, active: e.target.checked })}
+                className="h-4 w-4 text-primary rounded"
+              />
+              <label htmlFor="videoActive" className="text-sm font-medium">
+                Active on storefront homepage
+              </label>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="secondary" onClick={() => setIsVideoModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSaveVideoModal}>Save Video Short</Button>
             </div>
           </div>
         </Modal>

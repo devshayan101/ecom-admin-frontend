@@ -102,10 +102,6 @@ export default function PaymentSettingsPage() {
       toast.error("Failed to copy to clipboard");
     }
   };
-} catch {
-  toast.error("Failed to copy to clipboard");
-}
-  };
 
 if (loading) {
   return (
